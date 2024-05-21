@@ -158,7 +158,7 @@ def draw_frame_grid_prefs(mode, parentOperator, layout):
     row.label(text="Update Scene: ")
     subRow = row.row()
     subRow.scale_x = 3.0
-    subRow.operator("uas_shot_manager.storyboard_grid_update", text="", icon="LIGHTPROBE_GRID")
+    subRow.operator("uas_shot_manager.storyboard_grid_update", text="", icon="LIGHTPROBE_VOLUME")
 
     sepRow = col.row()
     sepRow.separator(factor=2.0)

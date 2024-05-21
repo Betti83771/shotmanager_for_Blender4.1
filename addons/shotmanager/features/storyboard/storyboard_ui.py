@@ -635,7 +635,7 @@ def draw_frame_grid(layout):
 
     subRow = row.row(align=True)
     subRow.scale_x = 3.0
-    subRow.operator("uas_shot_manager.storyboard_grid_update", text="", icon="LIGHTPROBE_GRID")
+    subRow.operator("uas_shot_manager.storyboard_grid_update", text="", icon="LIGHTPROBE_VOLUME")
     row.operator("uas_shot_manager.storyboard_grid_display_settings", text="", icon="SETTINGS")
     row.scale_x = 1
 
