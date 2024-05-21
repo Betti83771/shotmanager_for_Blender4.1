@@ -90,7 +90,7 @@ class Text2D(Object2D):
         return round(self.fontSize * getPrefsUIScale())
 
     def _drawText(self, shader=None, region=None, pX=10, pY=10):
-        # bgl.glDisable(bgl.GL_BLEND)
+       
         blf.enable(0, blf.CLIPPING)
         # blf.clipping(0, *self._clamped_bBox)
         margin = 20

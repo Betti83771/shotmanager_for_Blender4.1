@@ -100,7 +100,7 @@ class Mesh2D:
         return shader
 
     def _getTextureShader(self):
-        shader = gpu.shader.from_builtin("2D_IMAGE")
+        shader = gpu.shader.from_builtin("IMAGE")
         shader.bind()
         # color = set_color_alpha(self.colorLine, alpha_to_linear(self.colorLine[3] * self.opacity))
         # shader.uniform_float("color", color_to_sRGB(color))
@@ -111,7 +111,7 @@ class Mesh2D:
     ):
         v_indices = vertex_indices
 
-        bgl.glEnable(bgl.GL_BLEND)
+        #bgl.glEnable(bgl.GL_BLEND)
 
         if shader is None:
             UNIFORM_SHADER_2D.bind()
@@ -163,17 +163,17 @@ class Mesh2D:
             )
 
             batch = batch_for_shader(shader, draw_types, {"pos": vertices_inner}, indices=v_indices)
-            bgl.glLineWidth(self.lineThickness)
+            gpu.state.line_width_set(self.lineThickness)
             batch.draw(shader)
             if cap_lines or True:
                 batch = batch_for_shader(shader, "POINTS", {"pos": vertices_inner})
-                bgl.glPointSize(self.lineThickness)
+                gpu.state.point_size_set(self.lineThickness)
                 batch.draw(shader)
 
         elif "POINTS" == draw_types:
             # wkip here draw points for rounded line caps
             batch = batch_for_shader(shader, "POINTS", {"pos": transformed_vertices})
-            bgl.glPointSize(self.lineThickness)
+            gpu.state.point_size_set(self.lineThickness)
             batch.draw(shader)
 
         elif "TRI_FAN" == draw_types:
@@ -182,8 +182,8 @@ class Mesh2D:
                 _logger.error_ext(f"Error in loading image texture: {self._image}")
                 raise Exception()
 
-            bgl.glActiveTexture(bgl.GL_TEXTURE0)
-            bgl.glBindTexture(bgl.GL_TEXTURE_2D, self._image.bindcode)
+           #bgl.glActiveTexture(bgl.GL_TEXTURE0)
+           # bgl.glBindTexture(bgl.GL_TEXTURE_2D, self._image.bindcode)
 
             # setting the texture filtering mode:
             # https://blenderartists.org/t/bind-custom-uniform-values-to-a-2d-filter-using-bgl-wrapper/645232/8
@@ -191,10 +191,10 @@ class Mesh2D:
             # https://docs.blender.org/api/current/bgl.html?highlight=gltexparameteri
 
             # GL_NEAREST GL_LINEAR
-            bgl.glTexParameteri(bgl.GL_TEXTURE_2D, bgl.GL_TEXTURE_MIN_FILTER, bgl.GL_NEAREST)
-            bgl.glTexParameteri(bgl.GL_TEXTURE_2D, bgl.GL_TEXTURE_MAG_FILTER, bgl.GL_NEAREST)
+          #  bgl.glTexParameteri(bgl.GL_TEXTURE_2D, bgl.GL_TEXTURE_MIN_FILTER, bgl.GL_NEAREST)
+          #  bgl.glTexParameteri(bgl.GL_TEXTURE_2D, bgl.GL_TEXTURE_MAG_FILTER, bgl.GL_NEAREST)
 
-            textureShader = gpu.shader.from_builtin("2D_IMAGE")
+            textureShader = gpu.shader.from_builtin("IMAGE")
             batch = batch_for_shader(
                 textureShader,
                 "TRI_FAN",

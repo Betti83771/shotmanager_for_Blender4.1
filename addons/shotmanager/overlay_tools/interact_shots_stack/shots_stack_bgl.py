@@ -172,7 +172,6 @@ def draw_callback_modal_overlay(context, callingArea, targetAreaType="ALL", targ
 
     if okForDrawing:
         print("ogl2")
-        bgl.glEnable(bgl.GL_BLEND)
         UNIFORM_SHADER_2D.bind()
         color = (0.9, 0.0, 0.0, 0.9)
         UNIFORM_SHADER_2D.uniform_float("color", color)

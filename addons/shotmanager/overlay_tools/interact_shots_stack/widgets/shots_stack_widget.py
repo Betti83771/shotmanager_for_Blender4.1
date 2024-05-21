@@ -351,7 +351,6 @@ class ShotStackWidget:
             origin = Vector([startframe, get_lane_origin_y(lane)])
             self.debug_mesh = build_rectangle_mesh(origin, numFrames, height)
 
-            bgl.glEnable(bgl.GL_BLEND)
             UNIFORM_SHADER_2D.bind()
             color = (0.9, 0.0, 0.0, 0.9)
             UNIFORM_SHADER_2D.uniform_float("color", color)

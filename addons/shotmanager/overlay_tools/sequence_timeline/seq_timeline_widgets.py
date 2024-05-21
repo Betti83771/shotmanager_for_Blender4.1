@@ -366,9 +366,9 @@ class BL_UI_Shot:
 
         shader.bind()
         shader.uniform_float("color", self._shot_color if self.enabled else self._shot_color_disabled)
-        bgl.glEnable(bgl.GL_BLEND)
+      
         batch_panel.draw(shader)
-        bgl.glDisable(bgl.GL_BLEND)
+       
 
         # draw vertical separators
         line_thickness = 1
@@ -569,9 +569,9 @@ class BL_UI_Timeline:
         shader.bind()
         # shader.uniform_float ( "color", ( 1., .1, .1, 1 ) )
         shader.uniform_float("color", color)
-        bgl.glEnable(bgl.GL_BLEND)
+
         batch_panel.draw(shader)
-        bgl.glDisable(bgl.GL_BLEND)
+
 
     def draw_frame_caret(self, x, frame_width, color):
         caret_width = frame_width
@@ -598,9 +598,9 @@ class BL_UI_Timeline:
         shader.bind()
         # shader.uniform_float("color", (1.0, 0.1, 0.1, 1))
         shader.uniform_float("color", color)
-        bgl.glEnable(bgl.GL_BLEND)
+
         batch_panel.draw(shader)
-        bgl.glDisable(bgl.GL_BLEND)
+    
 
     def draw_shots(self):
         props = self.context.scene.UAS_shot_manager_props
@@ -679,9 +679,9 @@ class BL_UI_Timeline:
 
         shader.bind()
         shader.uniform_float("color", self._bg_color)
-        bgl.glEnable(bgl.GL_BLEND)
+        
         batch_panel.draw(shader)
-        bgl.glDisable(bgl.GL_BLEND)
+        
 
         self.draw_shots()
         if self.context.window_manager.UAS_shot_manager_shots_play_mode:

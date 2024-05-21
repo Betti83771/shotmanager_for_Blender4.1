@@ -53,7 +53,6 @@ def draw_tripod(xOrigin, yOrigin, scale=20, thickness=4):
     # draw lines and points fo the caps
     transformed_vertices = vertices
 
-    bgl.glEnable(bgl.GL_BLEND)
 
     # X axis ####
     UNIFORM_SHADER_2D.bind()
@@ -61,7 +60,7 @@ def draw_tripod(xOrigin, yOrigin, scale=20, thickness=4):
     shader = UNIFORM_SHADER_2D
 
     batch = batch_for_shader(shader, "LINES", {"pos": transformed_vertices}, indices=xAxisIndices)
-    bgl.glLineWidth(lineThickness)
+    gpu.state.line_width_set(lineThickness)
     batch.draw(shader)
 
     # Y axis ####
@@ -70,7 +69,7 @@ def draw_tripod(xOrigin, yOrigin, scale=20, thickness=4):
     shader = UNIFORM_SHADER_2D
 
     batch = batch_for_shader(shader, "LINES", {"pos": transformed_vertices}, indices=yAxisIndices)
-    bgl.glLineWidth(lineThickness)
+    gpu.state.line_width_set(lineThickness)
     batch.draw(shader)
     # cap_lines = True
     # if cap_lines:
@@ -92,14 +91,14 @@ def draw_bBox(bBox, thickness=1, color=(1.0, 1.0, 1.0, 1.0), drawDiagonal=True):
     if drawDiagonal:
         indices.append((1, 3))
 
-    bgl.glEnable(bgl.GL_BLEND)
+  
 
     UNIFORM_SHADER_2D.bind()
     UNIFORM_SHADER_2D.uniform_float("color", color_to_sRGB(color))
     shader = UNIFORM_SHADER_2D
 
     batch = batch_for_shader(shader, "LINES", {"pos": vertices}, indices=indices)
-    bgl.glLineWidth(lineThickness)
+    gpu.state.line_width_set(lineThickness)
     batch.draw(shader)
 
 
