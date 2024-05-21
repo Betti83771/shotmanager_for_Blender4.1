@@ -196,7 +196,7 @@ class ShotClipComponent(Component2D):
             opacity = clamp(1.2 * opacity, 0, 1)
 
         color = set_color_alpha(widColor, alpha_to_linear(widColor[3] * opacity))
-
+        gpu.state.blend_set("ALPHA")
         UNIFORM_SHADER_2D.bind()
         UNIFORM_SHADER_2D.uniform_float("color", color_to_sRGB(color))
         shader = UNIFORM_SHADER_2D
