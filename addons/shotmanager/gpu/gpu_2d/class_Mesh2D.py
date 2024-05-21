@@ -89,6 +89,7 @@ class Mesh2D:
         shader = UNIFORM_SHADER_2D
         shader.bind()
         color = set_color_alpha(self.color, alpha_to_linear(self.color[3] * self.opacity))
+        gpu.state.blend_set("ALPHA")
         shader.uniform_float("color", color_to_sRGB(color))
         return shader
 
@@ -96,6 +97,7 @@ class Mesh2D:
         shader = UNIFORM_SHADER_2D
         shader.bind()
         color = set_color_alpha(self.colorLine, alpha_to_linear(self.colorLine[3] * self.opacity))
+        gpu.state.blend_set("ALPHA")
         shader.uniform_float("color", color_to_sRGB(color))
         return shader
 

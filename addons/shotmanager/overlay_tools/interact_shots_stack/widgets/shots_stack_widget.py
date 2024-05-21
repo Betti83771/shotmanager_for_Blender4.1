@@ -374,7 +374,7 @@ class ShotStackWidget:
             workspace_info.draw_callback__dopesheet_lane_numbers(self, self.context, self.target_area)
 
             # return
-
+        
         self.infoComponent.draw(None, self.context.region)
 
         if props.interactShotsStack_displayInCompactMode:

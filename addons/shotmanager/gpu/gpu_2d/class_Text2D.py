@@ -305,6 +305,7 @@ class Text2D(Object2D):
         if shader is None:
             UNIFORM_SHADER_2D.bind()
             color = set_color_alpha(self.color, alpha_to_linear(self.color[3] * self.opacity))
+            gpu.state.blend_set("ALPHA")
             UNIFORM_SHADER_2D.uniform_float("color", color_to_sRGB(color))
             shader = UNIFORM_SHADER_2D
 
