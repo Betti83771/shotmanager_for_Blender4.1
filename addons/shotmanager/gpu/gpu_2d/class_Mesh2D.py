@@ -184,6 +184,7 @@ class Mesh2D:
 
            #bgl.glActiveTexture(bgl.GL_TEXTURE0)
            # bgl.glBindTexture(bgl.GL_TEXTURE_2D, self._image.bindcode)
+            texture = gpu.texture.from_image(self._image)
 
             # setting the texture filtering mode:
             # https://blenderartists.org/t/bind-custom-uniform-values-to-a-2d-filter-using-bgl-wrapper/645232/8
@@ -193,7 +194,6 @@ class Mesh2D:
             # GL_NEAREST GL_LINEAR
           #  bgl.glTexParameteri(bgl.GL_TEXTURE_2D, bgl.GL_TEXTURE_MIN_FILTER, bgl.GL_NEAREST)
           #  bgl.glTexParameteri(bgl.GL_TEXTURE_2D, bgl.GL_TEXTURE_MAG_FILTER, bgl.GL_NEAREST)
-
             textureShader = gpu.shader.from_builtin("IMAGE")
             batch = batch_for_shader(
                 textureShader,
@@ -204,7 +204,9 @@ class Mesh2D:
                 },
             )
             textureShader.bind()
-            textureShader.uniform_int("image", 0)
+            #textureShader.uniform_int("image", 0)
+            textureShader.uniform_sampler("image", texture)
+            gpu.state.blend_set("ALPHA")
             batch.draw(textureShader)
 
     def draw(self, shader=None, region=None, draw_types="TRIS", cap_lines=False, preDrawOnly=False):
