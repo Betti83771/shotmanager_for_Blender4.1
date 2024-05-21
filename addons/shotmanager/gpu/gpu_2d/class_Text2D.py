@@ -36,7 +36,7 @@ from shotmanager.config import sm_logging
 
 _logger = sm_logging.getLogger(__name__)
 
-UNIFORM_SHADER_2D = gpu.shader.from_builtin("2D_UNIFORM_COLOR")
+UNIFORM_SHADER_2D = gpu.shader.from_builtin("UNIFORM_COLOR")
 
 
 class Text2D(Object2D):
@@ -115,7 +115,7 @@ class Text2D(Object2D):
             # blf.shadow_offset(0, 1, -1)
 
         blf.color(0, *self.color)
-        blf.size(0, self._getFontSizeForGlDraw(), 72)
+        blf.size(0, self._getFontSizeForGlDraw())
         blf.position(0, pX, pY, 0)
 
         blf.draw(0, self.text)
@@ -173,7 +173,7 @@ class Text2D(Object2D):
         #         posX_inRegion = region.view2d.view_to_region(self.posX, 0, clip=False)[0]
 
         #     width = region.view2d.view_to_region(posX_inView + self.width, 0, clip=False)[0] - posX_inRegion
-        blf.size(0, self._getFontSizeForGlDraw(), 72)
+        blf.size(0, self._getFontSizeForGlDraw())
         width = blf.dimensions(0, self.text)[0]
         height = blf.dimensions(0, self.text)[1]
 

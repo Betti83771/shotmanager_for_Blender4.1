@@ -31,7 +31,7 @@ from shotmanager.config import sm_logging
 
 _logger = sm_logging.getLogger(__name__)
 
-UNIFORM_SHADER_2D = gpu.shader.from_builtin("2D_UNIFORM_COLOR")
+UNIFORM_SHADER_2D = gpu.shader.from_builtin("UNIFORM_COLOR")
 
 
 class InteractiveComponent:

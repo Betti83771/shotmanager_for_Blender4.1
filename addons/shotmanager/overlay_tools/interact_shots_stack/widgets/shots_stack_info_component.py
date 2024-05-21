@@ -44,7 +44,7 @@ from shotmanager.config import sm_logging
 
 _logger = sm_logging.getLogger(__name__)
 
-UNIFORM_SHADER_2D = gpu.shader.from_builtin("2D_UNIFORM_COLOR")
+UNIFORM_SHADER_2D = gpu.shader.from_builtin("UNIFORM_COLOR")
 
 
 class InfoComponent(QuadObject):
@@ -229,7 +229,7 @@ class InfoComponent(QuadObject):
 
         # def draw_infos(self, region):
         #     blf.color(0, 0.9, 0.9, 0.9, 0.9)
-        #     blf.size(0, 12, 72)
+        #     blf.size(0, 12)
         #     offset_y = 80
 
         #     txtStr = f"Mouse pos: Screen: x: "

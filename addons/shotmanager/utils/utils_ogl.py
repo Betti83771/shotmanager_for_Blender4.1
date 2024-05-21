@@ -62,7 +62,7 @@ class Square:
     of the expected result ! ***
     """
 
-    UNIFORM_SHADER_2D = gpu.shader.from_builtin("2D_UNIFORM_COLOR")
+    UNIFORM_SHADER_2D = gpu.shader.from_builtin("UNIFORM_COLOR")
 
     def __init__(self, x, y, sx, sy, color=(1.0, 1.0, 1.0, 1.0), origin="MIDDLE_MIDDLE"):
         """
@@ -160,7 +160,7 @@ class Rect:
     Origin of the object is at the center.
     """
 
-    UNIFORM_SHADER_2D = gpu.shader.from_builtin("2D_UNIFORM_COLOR")
+    UNIFORM_SHADER_2D = gpu.shader.from_builtin("UNIFORM_COLOR")
 
     def __init__(self, x, y, sx, sy, color=(1.0, 1.0, 1.0, 1.0), origin="MIDDLE_MIDDLE"):
         """
@@ -210,7 +210,7 @@ class Quadrilater:
     Origin of the object is at the center.
     """
 
-    UNIFORM_SHADER_2D = gpu.shader.from_builtin("2D_UNIFORM_COLOR")
+    UNIFORM_SHADER_2D = gpu.shader.from_builtin("UNIFORM_COLOR")
 
     def __init__(self, pt0, pt1, pt2, pt3, color=(1.0, 1.0, 1.0, 1.0)):
         self.pt0 = pt0
