@@ -48,12 +48,11 @@ def toggle_workspace_info_display(context):
 
 def draw_typo_2d(color, text, position, font_size):
     font_id = 0
-    dpi = 72
     z_detph = 0
 
     blf.position(font_id, position.x, position.y, z_detph)
     blf.color(font_id, color[0], color[1], color[2], color[3])
-    blf.size(font_id, font_size, dpi)
+    blf.size(font_id, font_size)
     blf.draw(font_id, text)
 
 
@@ -79,7 +78,7 @@ def draw_callback__dopesheet_lane_numbers(self, context, callingArea, displayLan
     rect_width = 50
 
     blf.color(0, 0.9, 0.9, 0.9, 0.9)
-    blf.size(0, font_size, 72)
+    blf.size(0, font_size)
     offset_y = 100
 
     rangeLanes = utils_editors_dopesheet.getDisplayedLanesRange(context.region)
@@ -176,14 +175,14 @@ def draw_callback__dopesheet_lane_numbers(self, context, callingArea, displayLan
         #     blf.draw(0, txtStr)
 
     txtStr = f"Range Lanes: [{rangeLanes[0]:03.2f}, {rangeLanes[1]:03.2f}], num full lanes: {rangeLanes[2]:03.2f}"
-    blf.size(0, 12, 72)
+    blf.size(0, 12)
     blf.position(0, 60, offset_y, 0)
     blf.draw(0, txtStr)
 
 
 def draw_callback__dopesheet_mouse_pos(self, context, callingArea):
     blf.color(0, 0.9, 0.9, 0.9, 0.9)
-    blf.size(0, 12, 72)
+    blf.size(0, 12)
     offset_y = 80
 
     rMouse_x = config.gMouseScreenPos[0] - context.region.x
@@ -209,7 +208,7 @@ def draw_callback__dopesheet_size(self, context, callingArea):
     blf.color(0, 0.9, 0.9, 0.9, 0.9)
 
     # blf.size(0, round(self.font_size * get_prefs_ui_scale()), 72)
-    blf.size(0, 12, 72)
+    blf.size(0, 12)
     # textPos_y = self.origin.y + 6 * get_prefs_ui_scale()
     # textPos_y = self.origin.y + utils_editors_dopesheet.getLaneHeight() * 0.2
     # blf.position(0, *context.region.view2d.view_to_region(self.origin.x + 1.4, textPos_y), 0)

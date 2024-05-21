@@ -209,7 +209,7 @@ class BL_UI_Cursor:
                     frameStr = "."
 
         blf.color(0, 0.9, 0.9, 0.9, 1)
-        blf.size(0, 12, 72)
+        blf.size(0, 12)
         font_width, font_height = blf.dimensions(0, frameStr)
         blf.position(0, box_to_draw.x - 0.5 * font_width, box_to_draw.y - 0.5 * font_height, 0)
         blf.draw(0, frameStr)
@@ -361,7 +361,7 @@ class BL_UI_Shot:
             (self.x_screen + self.width, y_screen_flip),
         )
 
-        shader = gpu.shader.from_builtin("2D_UNIFORM_COLOR")
+        shader = gpu.shader.from_builtin("UNIFORM_COLOR")
         batch_panel = batch_for_shader(shader, "TRIS", {"pos": vertices}, indices=indices)
 
         shader.bind()
@@ -439,7 +439,7 @@ class BL_UI_Shot:
             blf.color(0, *self._name_color_disabled)
 
         blf.shadow(0, 3, 0.1, 0.1, 0.1, 1)
-        blf.size(0, 12, 72)
+        blf.size(0, 12)
         blf.draw(0, self.name)
 
     def handle_event(self, event):
@@ -563,7 +563,7 @@ class BL_UI_Timeline:
             (x_screen + caret_width, y_screen_flip),
         )
 
-        shader = gpu.shader.from_builtin("2D_UNIFORM_COLOR")
+        shader = gpu.shader.from_builtin("UNIFORM_COLOR")
         batch_panel = batch_for_shader(shader, "TRIS", {"pos": vertices}, indices=indices)
 
         shader.bind()
@@ -592,7 +592,7 @@ class BL_UI_Timeline:
             (x_screen + caret_width, y_screen_flip - self.height),
         )
 
-        shader = gpu.shader.from_builtin("2D_UNIFORM_COLOR")
+        shader = gpu.shader.from_builtin("UNIFORM_COLOR")
         batch_panel = batch_for_shader(shader, "TRIS", {"pos": vertices}, indices=indices)
 
         shader.bind()
@@ -674,7 +674,7 @@ class BL_UI_Timeline:
             (self.x_screen + self.width, y_screen_flip),
         )
 
-        shader = gpu.shader.from_builtin("2D_UNIFORM_COLOR")
+        shader = gpu.shader.from_builtin("UNIFORM_COLOR")
         batch_panel = batch_for_shader(shader, "TRIS", {"pos": vertices}, indices=indices)
 
         shader.bind()

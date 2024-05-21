@@ -129,8 +129,7 @@ def draw_all_shots_names(context, cam, pos_x, pos_y, vertical=False, screen_offs
     font_size = prefs.cameraHUD_shotNameSize
 
     blf.color(0, 1, 1, 1, 1)
-    # blf.size(0, 12, 72)
-    blf.size(0, font_size, 72)
+    blf.size(0, font_size)
     # Take maximum font height
     _, font_height = blf.dimensions(0, "A")
     # font_height = font_height * 0.8
@@ -179,7 +178,7 @@ def draw_all_shots_names(context, cam, pos_x, pos_y, vertical=False, screen_offs
             shot_trim_info[c][1] = True
 
     # For all camera which have a shot draw on the ui a list of shots associated with it
-    # blf.size(0, font_size, 72)
+    # blf.size(0, font_size)
 
     blf.color(0, 0.9, 0.9, 0.9, 0.9)
 
