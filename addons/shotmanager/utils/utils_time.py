@@ -37,12 +37,14 @@ def zoom_dopesheet_view_to_range(context, start, end, changeTime=True):
             for region in area.regions:
                 if region.type == "WINDOW":
                     ctx["region"] = region
-                    bpy.ops.view2d.reset(ctx)
+                    with context.temp_override(**ctx):
+                        bpy.ops.view2d.reset()
                     if not changeTime:
                         prevTime = context.scene.frame_current
                     context.scene.frame_current = start + (end - start) // 2
-                    bpy.ops.action.view_frame(ctx)
-                    bpy.ops.view2d.zoom(ctx, deltax=(region.width // 2 - (end - start) // 2) - num_frames_around)
+                    with context.temp_override(**ctx):
+                        bpy.ops.action.view_frame()
+                        bpy.ops.view2d.zoom(deltax=(region.width // 2 - (end - start) // 2) - num_frames_around)
                     if not changeTime:
                         context.scene.frame_current = prevTime
 

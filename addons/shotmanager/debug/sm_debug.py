@@ -78,7 +78,8 @@ class UAS_MotionTrackingTab(Operator):
                 # ctx = {"area": area}
                 ctx["area"] = area
                 # bpy.ops.clip.rebuild_proxy("EXEC_AREA")
-                bpy.ops.sequencer.rebuild_proxy(ctx)
+                with context.temp_override(**ctx):
+                    bpy.ops.sequencer.rebuild_proxy()
                 break
 
         # bpy.context.area.ui_type = "CLIP_EDITOR"
