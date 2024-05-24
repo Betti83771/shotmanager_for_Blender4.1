@@ -337,7 +337,7 @@ def renderStampedImage(
         newLogoSize = (int(logoScaleW * renderH), int(logoScaleH * renderH))  # preserve logo size on height
 
         #  newLogoSize = (int(logoScale * imgLogoSource.size[0]), int(logoScale * imgLogoSource.size[1]))             # to get a precise logo size when output res in pixels is known
-        imgLogoSource = imgLogoSource.resize(newLogoSize, Image.ANTIALIAS)  # size in pixels # resamplming mode
+        imgLogoSource = imgLogoSource.resize(newLogoSize, Image.LANCZOS)  # size in pixels # resamplming mode
 
         # put logo on image in position (0, 0)
         imgInfo.paste(
