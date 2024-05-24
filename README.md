@@ -1,3 +1,11 @@
+## [DOWNLOAD THE LATEST VERSION OF SHOTMANAGER FOR BLENDER 4.1 HERE](https://github.com/Betti83771/shotmanager_for_Blender4.1/releases/latest)
+
+~ <br>
+~<br>
+~<br>
+~<br>
+~<br>
+ 
 <img align="left" width="auto" height="auto" src="doc/images/Logo_90_A.png">
 
 # Ubisoft Shot Manager - Blender Add-on
@@ -17,7 +25,7 @@
   <img src="doc/images/Documentation.png" width="160" />
   </a>
   &nbsp;&nbsp;&nbsp;
-  <a href="https://github.com/ubisoft/shotmanager/releases/latest" title="Download the latest release. For betas and experimental builds see the link below in the page">
+  <a href="https://github.com/Betti83771/shotmanager_for_Blender4.1/releases/latest" title="Download shotmanager for blender 4.1">
   <img src="doc/images/Download.png" width="160" />
   </a>
   &nbsp;&nbsp;&nbsp;
