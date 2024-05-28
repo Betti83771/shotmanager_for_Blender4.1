@@ -204,6 +204,13 @@ class UAS_ShotManager_RenderSettings(PropertyGroup):
         options=set(),
     )
 
+    separate_shots: BoolProperty(
+        name="Render Shots Separately",
+        description="When on: render playblast as a series of mp4 videos in the same folder, one per shot. When off: rener one, continuous video.",
+        default=True,
+        options=set(),
+    )
+
     # renderCameraBG: BoolProperty(
     #     name="Render Camera Backgrounds",
     #     description="Render Camera Backgrounds (available only with Overlay)",

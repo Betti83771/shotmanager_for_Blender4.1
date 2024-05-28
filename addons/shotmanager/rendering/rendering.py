@@ -1231,14 +1231,30 @@ def launchRender(context, renderMode, rootPath, area=None):
         if context.space_data.overlay.show_overlays and preset.disableCameraBG:
             bpy.ops.uas_shots_settings.use_background(useBackground=False)
 
-        renderedFilesDict = launchRenderWithVSEComposite(
+        if preset.separate_shots == False:
+            renderedFilesDict = launchRenderWithVSEComposite(
+                context,
+                preset,
+                takeIndex=-1,
+                filePath=props.renderRootPath,
+                fileListOnly=False,
+                rerenderExistingShotVideos=True,
+                generateShotVideos=False,
+                generateSequenceVideo=True,
+                renderAlsoDisabled=False,
+                render_handles=False,
+                renderSound=preset.renderSound,
+                area=area,
+            )
+        else:
+            renderedFilesDict = launchRenderWithVSEComposite(
             context,
             preset,
             takeIndex=-1,
             filePath=props.renderRootPath,
             fileListOnly=False,
             rerenderExistingShotVideos=True,
-            generateShotVideos=False,
+            generateShotVideos=True,
             generateSequenceVideo=True,
             renderAlsoDisabled=False,
             render_handles=False,

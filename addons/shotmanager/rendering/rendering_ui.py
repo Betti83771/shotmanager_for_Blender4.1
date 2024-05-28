@@ -792,7 +792,8 @@ def draw3DRenderPanel(self, context):
 
         itemsRow = bypassItemsCol.row()
         col = itemsRow.column()
-
+        row = col.row()
+        row.prop(props.renderSettingsPlayblast, "separate_shots")
         row = col.row()
         split = row.split(factor=0.45)
         split.prop(props.renderSettingsPlayblast, "stampRenderInfo")
