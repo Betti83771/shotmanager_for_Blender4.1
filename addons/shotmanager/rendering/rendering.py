@@ -404,9 +404,14 @@ def launchRenderWithVSEComposite(
             "SH_INTERM_IMAGE_SEQ" + playblastSuffix, rootPath=rootPath, provideName=False
         )
 
-        compositedMediaPath = shot.getOutputMediaPath(
-            "SH_VIDEO", rootPath=rootPath, insertSeqPrefix=True, specificFrame=specificFrame
-        )
+        if "PLAYBLAST" == renderMode and renderPreset.separate_shots == True:
+            compositedMediaPath = shot.getOutputMediaPath(
+                "SH_VIDEO_PLAYBLAST", rootPath=rootPath, insertSeqPrefix=True, specificFrame=specificFrame
+            )
+        else:
+            compositedMediaPath = shot.getOutputMediaPath(
+                "SH_VIDEO", rootPath=rootPath, insertSeqPrefix=True, specificFrame=specificFrame
+            )
 
         newMediaFiles.append(compositedMediaPath)
         if shot.enabled:
@@ -1255,7 +1260,7 @@ def launchRender(context, renderMode, rootPath, area=None):
             fileListOnly=False,
             rerenderExistingShotVideos=True,
             generateShotVideos=True,
-            generateSequenceVideo=True,
+            generateSequenceVideo=False,
             renderAlsoDisabled=False,
             render_handles=False,
             renderSound=preset.renderSound,

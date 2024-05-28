@@ -206,7 +206,7 @@ class UAS_ShotManager_RenderSettings(PropertyGroup):
 
     separate_shots: BoolProperty(
         name="Render Shots Separately",
-        description="When on: render playblast as a series of mp4 videos in the same folder, one per shot. When off: rener one, continuous video.",
+        description="When on: render playblast as a series of mp4 videos in the same folder, one per shot. When off: render one, continuous video.",
         default=True,
         options=set(),
     )

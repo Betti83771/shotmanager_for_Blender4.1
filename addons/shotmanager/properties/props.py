@@ -4725,6 +4725,8 @@ class UAS_ShotManager_Props(MontageInterface, PropertyGroup):
         # intermediate playblast directory name. Used in the directory name of the playblast renderings
         INTERM_PLAYBLAST_DIR = "_IntermPlayblast"
 
+        PLAYBAST_ROOT_DIR = "_PLAYBLAST"
+
         #  FOLDER_SEPARATOR = "\\"
         FOLDER_SEPARATOR = utils_os.get_dir_separator_char()
 
@@ -4741,14 +4743,14 @@ class UAS_ShotManager_Props(MontageInterface, PropertyGroup):
 
             # if insertTakeName or insertShotFolder or insertTempFolder or insertStampInfoPrefix:
             #     filePath += shot.getParentTake().getName_PathCompliant() + FOLDER_SEPARATOR
-
             if "SH_" == outputMedia[0:3]:
                 # entity is a shot
-                filePath += entity.getParentTake().getName_PathCompliant() + FOLDER_SEPARATOR
-
-                if "SH_VIDEO" != outputMedia:
+                if "PLAYBLAST"  in outputMedia :
+                    filePath += PLAYBAST_ROOT_DIR + FOLDER_SEPARATOR
+                else:
+                    filePath += entity.getParentTake().getName_PathCompliant() + FOLDER_SEPARATOR
+                if ("SH_VIDEO" != outputMedia) and ("SH_VIDEO_PLAYBLAST" not in outputMedia):
                     filePath += f"{entity.getName_PathCompliant()}"
-
                     # if "INTERM_" == outputMedia[3:10]:
                     if "_INTERM" in outputMedia:
                         if "_PLAYBLAST" in outputMedia:
@@ -4762,6 +4764,8 @@ class UAS_ShotManager_Props(MontageInterface, PropertyGroup):
                             filePath += INTERM_DIR
 
                     filePath += FOLDER_SEPARATOR
+                
+
 
             # if insertShotFolder or insertTempFolder:
             #     filePath += f"{shot.getName_PathCompliant()}"
@@ -4771,7 +4775,7 @@ class UAS_ShotManager_Props(MontageInterface, PropertyGroup):
 
             elif "TK_" == outputMedia[0:3]:
                 # entity is a take
-                filePath += entity.getName_PathCompliant() + FOLDER_SEPARATOR
+                filePath += PLAYBAST_ROOT_DIR + FOLDER_SEPARATOR
             # elif "EDIT_" == outputMedia[0:5]:
 
         # file name
@@ -4800,7 +4804,7 @@ class UAS_ShotManager_Props(MontageInterface, PropertyGroup):
 
             elif "TK_" == outputMedia[0:3]:
                 if "TK_PLAYBLAST" == outputMedia:
-                    fileName += "_playblast_"
+                    fileName += "playblast_"
 
                 # entity is a take
                 fileName += entity.getName_PathCompliant(withPrefix=insertSeqPrefix)

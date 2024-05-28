@@ -338,8 +338,6 @@ def drawRenderInfos(context, layout):
         #     rowAlert.alert = True
         #     rowAlert.label(text="*** Invalid Root Path ***")
 
-        take = props.getCurrentTake()
-        filePath = props.getOutputMediaPath("TK_PLAYBLAST", take, rootPath=props.renderRootPath)
 
         # # TODO wkip
         # if 100 != scene.render.resolution_percentage:
@@ -351,11 +349,17 @@ def drawRenderInfos(context, layout):
         #     row.alert = True
         #     row.separator(factor=sepFactor)
         #     row.label(text=infosStr)
-
+        
+        take = props.getCurrentTake()
         col.separator(factor=sepHeight)
         row = col.row()
         row.separator(factor=sepFactor)
-        row.label(text="Playblast Video: " + filePath)
+        if props.renderSettingsPlayblast.separate_shots:
+            filePath = props.getOutputMediaPath("SH_VIDEO_PLAYBLAST", take,  provideName=False, rootPath=props.renderRootPath)
+            row.label(text="Playblast Videos: " + filePath)
+        else:
+            filePath = props.getOutputMediaPath("TK_PLAYBLAST", take, rootPath=props.renderRootPath)
+            row.label(text="Playblast Video: " + filePath)
         row.operator("uas_shot_manager.open_explorer", text="", icon_value=iconExplorer.icon_id).path = str(
             Path(bpy.path.abspath(filePath))
         )
