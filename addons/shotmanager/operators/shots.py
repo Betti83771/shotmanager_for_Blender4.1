@@ -59,6 +59,16 @@ def list_cameras_for_new_shot(self, context):
 
     return res
 
+def list_shots_for_new_shot(self, context):
+    res = list()
+    props = config.getAddonProps(context.scene)
+    shotList = props.getShotsList()
+    for i, shot in enumerate(shotList):
+        res.append(
+            (shot.name, shot.name, 'Copy the keyframes of the shot named "' + shot.name + '"\nfor the new shot', i + 1)
+        )
+
+    return res
 
 def list_cameras_for_new_shots(self, context):
     res = list()
@@ -673,6 +683,13 @@ class UAS_ShotManager_ShotAdd(Operator):
         "\nIf not checked then the camera is placed at the cursor location",
         default=True,
     )
+    copy_animation: BoolProperty(
+        name="Copy Animation From Existing Shot",
+        description="",
+        default=False,
+    )
+
+    shot_anim_from: EnumProperty(items=list_shots_for_new_shot, name="Shot to copy", description="Shot to copy the animation from")
 
     addStoryboardGP: BoolProperty(
         name="Add Storyboard Grease Pencil",
@@ -727,6 +744,8 @@ class UAS_ShotManager_ShotAdd(Operator):
 
         self.cameraName = "NEW_CAMERA"
         self.cameraAssetName = "DEFAULT_CAMERA"
+        shots_list = props.getShotsList()
+        self.shot_anim_from = shots_list[0].name
 
         #     cameras = props.getSceneCameras()
         #    # selectedObjs = []  #bpy.context.view_layer.objects.active    # wkip get the selection
@@ -916,6 +935,26 @@ class UAS_ShotManager_ShotAdd(Operator):
                 subrow.alignment = "RIGHT"
                 subrow.label(text=" ")
                 mainRowSplit.prop(self, "alignCamToView", text="Align New Camera to View")
+
+            # copy animation
+            row = doubleRow.row(align=True)
+            mainRowSplit = row.split()
+            subrow = mainRowSplit.row()
+            subrow.alignment = "RIGHT"
+            subrow.label(text="Copy Animation:  ")
+            mainRowSplit = row.split()
+            mainRowSplit.prop(self, "copy_animation")
+
+            if self.copy_animation:
+                row = doubleRow.row(align=True)
+                mainRowSplit = row.split(factor=splitFactor)
+                mainRowSplit.label(text=" ")
+                mainRowSplit = row.split()
+
+                row = mainRowSplit.row()
+                row.prop(self, "shot_anim_from", text="")
+                row.alignment = 'LEFT'
+
 
             if props.getCurrentLayout().display_storyboard_in_properties:
                 col.separator(factor=0.1)
