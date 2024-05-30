@@ -1208,6 +1208,19 @@ def retimeScene(
                 obj.animation_data.action = None
                 obj.animation_data.action = action_backup
 
+    # world, compositor, movie strtips
+    if context.scene.node_tree is not None:
+        if context.scene.node_tree.animation_data is not None:
+            _retimeFcurve(context.scene.node_tree.animation_data.action)
+    if context.scene.world is not None:
+        if context.scene.world.node_tree.animation_data is not None:
+            _retimeFcurve(context.scene.world.node_tree.animation_data.action)
+    if context.scene.animation_data is not None:
+        _retimeFcurve(context.scene.animation_data.action)
+
+
+
+
     # VSE
     # no operation for CLEAR_ANIM
     if "CLEAR_ANIM" != mode:
