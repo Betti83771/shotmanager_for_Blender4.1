@@ -3139,8 +3139,9 @@ class UAS_ShotManager_Props(MontageInterface, PropertyGroup):
         )
 
         newShot.shotType = shot.shotType
-        newShot.bgImages_offset = shot.bgImages_offset
-        newShot.bgImages_linkToShotStart = shot.bgImages_linkToShotStart
+        
+        #newShot.bgImages_offset = shot.bgImages_offset
+        #newShot.bgImages_linkToShotStart = shot.bgImages_linkToShotStart
 
         newShot.note01 = shot.note01
         newShot.note03 = shot.note02
