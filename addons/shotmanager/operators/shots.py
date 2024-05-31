@@ -1063,6 +1063,12 @@ class UAS_ShotManager_ShotDuplicate(Operator):
         default=False,
     )
 
+    ca_copy_gp_frames: BoolProperty(
+        name="Copy Gease Pencil Frames",
+        description="",
+        default=True,
+    )
+
    # shot_anim_from: EnumProperty(items=list_shots_for_new_shot, name="Shot to copy", description="Shot to copy the animation from")
 
     @classmethod
@@ -1148,6 +1154,12 @@ class UAS_ShotManager_ShotDuplicate(Operator):
         col2.alignment = "LEFT"
         col1.label(text="Copy Animation:  ")
         col2.prop(self, "copy_animation")
+        # subsplit copy gp
+        if self.copy_animation:
+            subsplit = col2.split(factor=0.1)
+            scol1=subsplit.column()
+            scol2=subsplit.column()
+            scol2.prop(self, "ca_copy_gp_frames")
 
         #if self.copy_animation:
        #     col1.label(text=" ")
@@ -1201,9 +1213,9 @@ class UAS_ShotManager_ShotDuplicate(Operator):
                             context, 
                             range_start:int, 
                             range_end:int, 
-                            )->dict:
+                            )->tuple[dict, dict]:
         """Returns the copied keyframe information in a dictionary
-        { fcurve: [
+        data ={ fcurve: [
             {"point_co": (x, y),
             "point_type": 'TYPE',
             "handle_l_co": (x, y),
@@ -1215,10 +1227,12 @@ class UAS_ShotManager_ShotDuplicate(Operator):
         ],
         fcurve: [.....],
         ..................
-        }"""
+        }
+        gp_data={layer: [(frame in range, frame_number), (.. ,.. ) .....], ....}
+        """
         data = {}
         handle_offset = (range_end-range_start)/15
-
+        gp_data={}
         
         # D.actions contains object and armature actions, shape key actions, shader node tree actions (materials and gp materials),
         # compositing nodetree actions, movie clip actions
@@ -1226,6 +1240,16 @@ class UAS_ShotManager_ShotDuplicate(Operator):
         ad_list = [obj.animation_data for obj in context.scene.objects]
         for obj in context.scene.objects:
             ad_list.append(obj.animation_data)
+
+            # grease pencils: 
+            if self.ca_copy_gp_frames:
+                if obj.type == 'GPENCIL':
+                    for layer in obj.data.layers:
+                        gp_data[layer] = []
+                        for frame in layer.frames:
+                            gp_data[layer].append((frame , frame.frame_number))
+
+
             # animated materials
             for matSlot in obj.material_slots:
                 if matSlot is not None:
@@ -1292,20 +1316,15 @@ class UAS_ShotManager_ShotDuplicate(Operator):
                         }
                         data[fc].append(kf_data)
                         
-                
-
-        
-        # grease pencils: #TODO. Make a toggle in the menu to copy grease pencil frames too.
-        for gp in bpy.data.grease_pencils:
-            pass
 
         # masks: insert keyframe not implemented
 
-        return data
+        return data, gp_data
     
     def paste_shot_keyframes(self, 
                             context, 
                             data:dict,
+                            gp_data:dict,
                             tg_range_start:int, 
                             tg_range_end:int,
                             orig_range_start:int,
@@ -1342,19 +1361,20 @@ class UAS_ShotManager_ShotDuplicate(Operator):
             
             # insert all keyframes from dictionary
             for kf_data in data[fc]:
-                if fc == bpy.data.actions['Cam_SH0010Action'].fcurves[0]:
-                    print(kf_data["point_co"])
                 nkey = self.keyframe_at_frame(fc, (int(kf_data["point_co"].x)*stretch)  +  offset)
                 nkey.co.y = kf_data["point_co"].y
                 nkey.interpolation = kf_data["point_type"]
                 nkey.handle_left_type = kf_data["handle_l_type"] 
-                nkey.handle_left = Vector(((kf_data["handle_l_co"].x)*stretch  + offset, kf_data["handle_l_co"].y))
+                nkey.handle_left = Vector(((kf_data["handle_l_co"].x*stretch)  + offset, kf_data["handle_l_co"].y))
                 nkey.handle_right_type = kf_data["handle_r_type"]
-                nkey.handle_right = Vector((kf_data["handle_r_co"].x + (offset*stretch), kf_data["handle_r_co"].y))
-                if fc == bpy.data.actions['Cam_SH0010Action'].fcurves[0]:
-                    print("afeter ",  nkey.co)
-
+                nkey.handle_right = Vector(((kf_data["handle_r_co"].x*stretch) + offset, kf_data["handle_r_co"].y))
                 fc.update()
+        
+        if self.ca_copy_gp_frames:
+            for layer in gp_data:
+                for frame, fn in gp_data[layer]:
+                    newf = layer.frames.copy(frame)
+                    newf.frame_number = int((fn*stretch) + offset)
                     
                 
 
@@ -1370,8 +1390,9 @@ class UAS_ShotManager_ShotDuplicate(Operator):
         if self.copy_animation:
             rtc_start = selectedShot.start # range to copy
             rtc_end = selectedShot.end
-            data =self.copy_shot_keyframes(context, rtc_start, rtc_end)
-            self.paste_shot_keyframes(context, data,  self.new_range_start, self.new_range_end, rtc_start, rtc_end)
+            data, gp_data =self.copy_shot_keyframes(context, rtc_start, rtc_end)
+            self.paste_shot_keyframes(context, data, gp_data, self.new_range_start, self.new_range_end, rtc_start, rtc_end)
+
         copyGreasePencil = self.duplicateCam and self.duplicateStoryboardFrame
         newShot = props.copyShot(
             selectedShot, atIndex=newShotInd, copyCamera=self.duplicateCam, copyGreasePencil=copyGreasePencil,
