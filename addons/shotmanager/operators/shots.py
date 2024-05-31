@@ -24,6 +24,7 @@ from pathlib import Path
 import bpy
 from bpy.types import Operator
 from bpy.props import IntProperty, StringProperty, EnumProperty, BoolProperty, FloatVectorProperty
+from mathutils import Vector
 
 from random import uniform
 import json
@@ -37,6 +38,8 @@ from shotmanager.utils.utils import slightlyRandomizeColor
 
 from shotmanager.config import config
 from shotmanager.config import sm_logging
+
+from shotmanager.retimer import retimer 
 
 _logger = sm_logging.getLogger(__name__)
 
@@ -683,13 +686,6 @@ class UAS_ShotManager_ShotAdd(Operator):
         "\nIf not checked then the camera is placed at the cursor location",
         default=True,
     )
-    copy_animation: BoolProperty(
-        name="Copy Animation From Existing Shot",
-        description="",
-        default=False,
-    )
-
-    shot_anim_from: EnumProperty(items=list_shots_for_new_shot, name="Shot to copy", description="Shot to copy the animation from")
 
     addStoryboardGP: BoolProperty(
         name="Add Storyboard Grease Pencil",
@@ -744,8 +740,6 @@ class UAS_ShotManager_ShotAdd(Operator):
 
         self.cameraName = "NEW_CAMERA"
         self.cameraAssetName = "DEFAULT_CAMERA"
-        shots_list = props.getShotsList()
-        self.shot_anim_from = shots_list[0].name
 
         #     cameras = props.getSceneCameras()
         #    # selectedObjs = []  #bpy.context.view_layer.objects.active    # wkip get the selection
@@ -936,25 +930,6 @@ class UAS_ShotManager_ShotAdd(Operator):
                 subrow.label(text=" ")
                 mainRowSplit.prop(self, "alignCamToView", text="Align New Camera to View")
 
-            # copy animation
-            row = doubleRow.row(align=True)
-            mainRowSplit = row.split()
-            subrow = mainRowSplit.row()
-            subrow.alignment = "RIGHT"
-            subrow.label(text="Copy Animation:  ")
-            mainRowSplit = row.split()
-            mainRowSplit.prop(self, "copy_animation")
-
-            if self.copy_animation:
-                row = doubleRow.row(align=True)
-                mainRowSplit = row.split(factor=splitFactor)
-                mainRowSplit.label(text=" ")
-                mainRowSplit = row.split()
-
-                row = mainRowSplit.row()
-                row.prop(self, "shot_anim_from", text="")
-                row.alignment = 'LEFT'
-
 
             if props.getCurrentLayout().display_storyboard_in_properties:
                 col.separator(factor=0.1)
@@ -1059,14 +1034,6 @@ class UAS_ShotManager_ShotAdd(Operator):
         else:
             utils.add_to_selection(cam)
 
-        # removed, now done in camera HUD overlay tool
-        # if 0 < props.getNumShots() and props.camera_hud_display_in_viewports:
-        #     bpy.ops.uas_shot_manager.draw_camera_hud_in_viewports("INVOKE_DEFAULT")
-        #     bpy.ops.uas_shot_manager.draw_camera_hud_in_pov("INVOKE_DEFAULT")
-
-        # removed, now done in addShot
-        # props.setCurrentShotByIndex(newShotInd)
-        # props.setSelectedShotByIndex(newShotInd)
 
         return {"INTERFACE"}
 
@@ -1087,6 +1054,17 @@ class UAS_ShotManager_ShotDuplicate(Operator):
     useDifferentColor: BoolProperty(name="Slightly Different Color", default=True)
     duplicateStoryboardFrame: BoolProperty(name="Duplicate Storyboard Frame", default=True)
 
+    new_range_start: IntProperty(name="New range start")
+    new_range_end: IntProperty(name="New range end")
+
+    copy_animation: BoolProperty(
+        name="Copy Animation From Existing Shot",
+        description="",
+        default=False,
+    )
+
+   # shot_anim_from: EnumProperty(items=list_shots_for_new_shot, name="Shot to copy", description="Shot to copy the animation from")
+
     @classmethod
     def poll(cls, context):
         props = config.getAddonProps(context.scene)
@@ -1102,6 +1080,8 @@ class UAS_ShotManager_ShotDuplicate(Operator):
         self.name = selectedShot.name + "_duplicate"
         if selectedShot.camera is not None:
             self.camName = selectedShot.camera.name + "_duplicate"
+        self.new_range_start = selectedShot.start
+        self.new_range_end = selectedShot.end
         return context.window_manager.invoke_props_dialog(self, width=350)
 
     def draw(self, context):
@@ -1152,8 +1132,223 @@ class UAS_ShotManager_ShotDuplicate(Operator):
             row = camPropsCol.row()
             row.enabled = self.duplicateCam
             row.prop(self, "duplicateStoryboardFrame")
+        
+        # new range
+        row = box.row()
+        row.label(text="New range:")
+        row = box.row(align=True)
+        row.prop(self, "new_range_start")
+        row.prop(self, "new_range_end")
+
+        # copy animation
+        split = box.split(factor=0.3)
+        col1 = split.column()
+        col2 = split.column()
+        col1.alignment = "RIGHT"
+        col2.alignment = "LEFT"
+        col1.label(text="Copy Animation:  ")
+        col2.prop(self, "copy_animation")
+
+        #if self.copy_animation:
+       #     col1.label(text=" ")
+        #    col2.prop(self, "shot_anim_from", text="")
+        #    col2.label(text="Scene will be retimed", icon='ERROR')
+        #    col1.label(text="")
 
         box.separator(factor=0.4)
+
+        
+    def custom_retime(self, offset):
+        for ac in bpy.data.actions:
+            # skip orphan actions and actions with fake user
+            if (ac.users < 1) or (ac.users ==1 and ac.use_fake_user):
+                continue
+            for fc in ac.fcurves:
+                # add offset to keyframes and handles
+                for kf in fc.keyframe_points:
+                    kf.co.x = kf.co.x + offset
+                    kf.handle_left.x = kf.handle_left.x + offset
+                    kf.handle_right.x = kf.handle_right.x + offset
+                fc.update()
+        
+        #TODO grease pencil
+
+        # slide the shots forward
+        
+
+    def keyframe_at_frame(self, fcurve:bpy.types.FCurve, frame:int )->bpy.types.Keyframe:
+        """ Add a keyframe if it doesnt exist.
+        Returns the  newly created frame or the existing one"""
+
+        # check existing
+        for kf in fcurve.keyframe_points:
+            if kf.co.x == float(frame):
+                return kf
+
+        # add new
+        y = fcurve.evaluate(frame)
+        keyframe_count = len(fcurve.keyframe_points)
+        fcurve.keyframe_points.add(1)
+        key = fcurve.keyframe_points[keyframe_count]
+        
+        key.co = (float(frame), y)
+        key.handle_left_type = 'VECTOR'
+        key.handle_right_type = 'VECTOR'
+        return key
+
+    def copy_shot_keyframes(self, 
+                            context, 
+                            range_start:int, 
+                            range_end:int, 
+                            )->dict:
+        """Returns the copied keyframe information in a dictionary
+        { fcurve: [
+            {"point_co": (x, y),
+            "point_type": 'TYPE',
+            "handle_l_co": (x, y),
+            "handle_l_type": 'TYPE',
+            "handle_r_co": (x, y),
+            "handle_r_type": 'TYPE'
+            },
+            .......
+        ],
+        fcurve: [.....],
+        ..................
+        }"""
+        data = {}
+        handle_offset = (range_end-range_start)/15
+
+        
+        # D.actions contains object and armature actions, shape key actions, shader node tree actions (materials and gp materials),
+        # compositing nodetree actions, movie clip actions
+        # We only need actions of current scene
+        ad_list = [obj.animation_data for obj in context.scene.objects]
+        for obj in context.scene.objects:
+            ad_list.append(obj.animation_data)
+            # animated materials
+            for matSlot in obj.material_slots:
+                if matSlot is not None:
+                    ad1 = matSlot.material.animation_data
+                    if ad1 is not None and ad1 not in ad_list:
+                        ad_list.append(ad1)
+                    if matSlot.material.node_tree is not None:
+                        ad2 = matSlot.material.node_tree.animation_data
+                        if ad2 is not None and ad2 not in ad_list:
+                            ad_list.append(ad2)
+            try:
+                ad_list.append(obj.data.animation_data)
+            except AttributeError:
+                continue
+            try:
+                ad_list.append(obj.data.shape_keys.animation_data)
+            except AttributeError:
+                pass
+        ad_list.append(context.scene.node_tree.animation_data)
+        ad_list.append(context.scene.world.node_tree.animation_data)
+        ad_list.append(context.scene.animation_data)
+                
+        for ad in ad_list:
+            if ad is None: continue
+            ac = ad.action
+            if ac is None: continue
+            # skip orphan actions and actions with fake user
+            #if (ac.users < 1) or (ac.users ==1 and ac.use_fake_user):
+             #   continue
+            for fc in ac.fcurves:
+                data[fc] = []
+                # store keyframe at start and end of range.
+                start_data = {
+                    "point_co": Vector((float(range_start), fc.evaluate(range_start))),
+                    "point_type": 'BEZIER',
+                    "handle_l_co": Vector((float(range_start), fc.evaluate(range_start-handle_offset))),
+                    "handle_l_type": 'VECTOR',
+                    "handle_r_co": Vector((float(range_start), fc.evaluate(range_start+handle_offset))),
+                    "handle_r_type": 'VECTOR'
+                    }
+                data[fc].append(start_data)
+                end_data = {
+                    "point_co": Vector((float(range_end), fc.evaluate(range_end))),
+                    "point_type": 'BEZIER',
+                    "handle_l_co": Vector((float(range_end), fc.evaluate(range_end-handle_offset))),
+                    "handle_l_type": 'VECTOR',
+                    "handle_r_co": Vector((float(range_end), fc.evaluate(range_end+handle_offset))),
+                    "handle_r_type": 'VECTOR'
+                    }
+                data[fc].append(end_data)
+                print("end_data",end_data["point_co"])
+                
+
+                # put all the keyframes in range in the data dict
+                for kf in fc.keyframe_points:
+                    if kf.co.x <= range_end and kf.co.x >= range_start:
+                        kf_data = {
+                            "point_co": kf.co,
+                            "point_type": kf.interpolation,
+                            "handle_l_co": kf.handle_left,
+                            "handle_l_type": kf.handle_left_type,
+                            "handle_r_co": kf.handle_right,
+                            "handle_r_type": kf.handle_right_type
+                        }
+                        data[fc].append(kf_data)
+                        print(kf_data["point_co"])
+                
+
+        
+        # grease pencils: #TODO. Make a toggle in the menu to copy grease pencil frames too.
+        for gp in bpy.data.grease_pencils:
+            pass
+
+        # masks: insert keyframe not implemented
+
+        return data
+    
+    def paste_shot_keyframes(self, 
+                            context, 
+                            data:dict,
+                            tg_range_start:int, 
+                            tg_range_end:int,
+                            orig_range_start:int,
+                            orig_range_end:int,):
+        
+         # retime to free target range
+        props = config.getAddonProps(context.scene)
+        retimerApplyToSettings = props.retimer.getCurrentApplyToSettings()
+        retimerApplyToSettings.initialize('SCENE')
+        retimerApplyToSettings.applyToStoryboardShotRanges = True
+        retimer.retimeScene(
+            context=context,
+            retimeMode="INSERT",
+            objects=context.scene.objects,
+            start_incl=tg_range_start,
+            duration_incl=tg_range_end-tg_range_start,
+            retimerApplyToSettings=retimerApplyToSettings,
+            factor=1.0,
+            pivot=tg_range_start,
+        )
+
+        for fc in data.keys():
+            # insert keyframe at start-1 and end+1 of target range
+            self.keyframe_at_frame(fc, tg_range_start-1)
+            fc.update()
+            self.keyframe_at_frame(fc, tg_range_end+1)
+            fc.update()
+            offset = tg_range_start-orig_range_start
+            stretch = float(round((tg_range_end-tg_range_start)/(orig_range_end-orig_range_start)))
+            print(stretch, tg_range_end-tg_range_start, orig_range_end-orig_range_start)
+
+            # insert all keyframes from dictionary
+            for kf_data in data[fc]:
+                nkey = self.keyframe_at_frame(fc, (int(kf_data["point_co"].x)*stretch)  +  offset)
+                nkey.co.y = kf_data["point_co"].y
+                nkey.interpolation = kf_data["point_type"]
+                nkey.handle_left_type = kf_data["handle_l_type"] 
+                nkey.handle_left = Vector(((kf_data["handle_l_co"].x)*stretch  + offset, kf_data["handle_l_co"].y))
+                nkey.handle_right_type = kf_data["handle_r_type"]
+                nkey.handle_right = Vector((kf_data["handle_r_co"].x + (offset*stretch), kf_data["handle_r_co"].y))
+                fc.update()
+                
+            
+        return
 
     def execute(self, context):
         props = config.getAddonProps(context.scene)
@@ -1164,9 +1359,15 @@ class UAS_ShotManager_ShotDuplicate(Operator):
             return {"CANCELLED"}
 
         newShotInd = len(props.get_shots()) if self.addToEndOfList else selectedShotInd + 1
+        if self.copy_animation:
+            rtc_start = selectedShot.start # range to copy
+            rtc_end = selectedShot.end
+            data =self.copy_shot_keyframes(context, rtc_start, rtc_end)
+            self.paste_shot_keyframes(context, data,  self.new_range_start, self.new_range_end, rtc_start, rtc_end)
         copyGreasePencil = self.duplicateCam and self.duplicateStoryboardFrame
         newShot = props.copyShot(
-            selectedShot, atIndex=newShotInd, copyCamera=self.duplicateCam, copyGreasePencil=copyGreasePencil
+            selectedShot, atIndex=newShotInd, copyCamera=self.duplicateCam, copyGreasePencil=copyGreasePencil,
+            newrange=(self.new_range_start, self.new_range_end)
         )
 
         # newShot.name = props.getUniqueShotName(self.name)

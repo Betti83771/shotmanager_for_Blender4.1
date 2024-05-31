@@ -3069,7 +3069,7 @@ class UAS_ShotManager_Props(MontageInterface, PropertyGroup):
 
         return newCam
 
-    def copyShot(self, shot, atIndex=-1, targetTakeIndex=-1, copyCamera=False, copyGreasePencil=False):
+    def copyShot(self, shot, atIndex=-1, targetTakeIndex=-1, copyCamera=False, copyGreasePencil=False, newrange=()):
         """Copy a shot after the current shot if possible or at the end of the shot list otherwise (case of an add in a take
         that is not the current one)
         Return the newly added shot
@@ -3118,12 +3118,19 @@ class UAS_ShotManager_Props(MontageInterface, PropertyGroup):
         if targetTakeIndex == sourceTakeInd:
             nameSuffix = "_copy"
 
+        if newrange==():
+            start=shot.start
+            end=shot.end
+        else:
+            start=newrange[0]
+            end=newrange[1]
+
         newShot = self.addShot(
             atIndex=atIndex,
             takeIndex=targetTakeIndex,
             name=shot.name + nameSuffix,
-            start=shot.start,
-            end=shot.end,
+            start=start,
+            end=end,
             durationLocked=shot.durationLocked,
             camera=cam,
             color=cam.color,
