@@ -508,8 +508,6 @@ class UAS_ShotManager_ShotTimeInEdit(Operator):
         props = config.getAddonProps(context.scene)
         argArr = json.loads(self.shotSource)
 
-        # print("shotSource: ", self.shotSource)
-        # print("argArr: ", argArr)
         shot = props.getShotByIndex(argArr[0])
 
         if context.window_manager.UAS_shot_manager_shots_play_mode:
@@ -1233,17 +1231,28 @@ class UAS_ShotManager_ShotDuplicate(Operator):
         data = {}
         handle_offset = (range_end-range_start)/15
         gp_data={}
-        
+        props = config.getAddonProps(context.scene)
+        selectedShot = props.getSelectedShot()
+        associated_gp = utils_greasepencil.get_greasepencil_child(selectedShot.camera)
+
+
         # D.actions contains object and armature actions, shape key actions, shader node tree actions (materials and gp materials),
         # compositing nodetree actions, movie clip actions
         # We only need actions of current scene
         ad_list = [obj.animation_data for obj in context.scene.objects]
+
+        
+
         for obj in context.scene.objects:
             ad_list.append(obj.animation_data)
 
             # grease pencils: 
             if self.ca_copy_gp_frames:
                 if obj.type == 'GPENCIL':
+                    # exclude is some other shot.
+                    if obj.parent.parent.type=='CAMERA':
+                        if obj != associated_gp:
+                            continue
                     for layer in obj.data.layers:
                         gp_data[layer] = []
                         for frame in layer.frames:
@@ -1300,7 +1309,7 @@ class UAS_ShotManager_ShotDuplicate(Operator):
                     "handle_r_type": 'AUTO_CLAMPED'
                     }
                 data[fc].append(end_data)
-              #  print("end_data",end_data["point_co"], fc.data_path, fc.array_index)
+              
                 
 
                 # put all the keyframes in range in the data dict
@@ -1840,13 +1849,10 @@ class UAS_ShotManager_DuplicateShotsToOtherTake(Operator):
         props = config.getAddonProps(context.scene)
         enabledShots = props.getShotsList(ignoreDisabled=True)
         targetTakeInd = props.getTakeIndexByName(self.targetTake)
-        # print(f"targetTakeInd: {targetTakeInd}")
-        # print(f"insertAfterShot: {self.insertAfterShot}")
 
         insertAfterShotInd = int(self.insertAfterShot) + 1
         insertAtInd = insertAfterShotInd
         for shot in enabledShots:
-            # print(f"insertAtInd: {insertAtInd}")
             props.copyShot(shot, atIndex=insertAtInd, copyCamera=self.duplicateCam, targetTakeIndex=targetTakeInd)
             insertAtInd += 1
 
@@ -1885,8 +1891,6 @@ class UAS_ShotManager_ShotRemoveMultiple(Operator):
     @classmethod
     def description(self, context, properties):
         descr = "_"
-        # print("properties: ", properties)
-        # print("properties action: ", properties.action)
         if "ALL" == properties.action:
             descr = "Remove all shots from the current take"
         elif "DISABLED" == properties.action:
@@ -1981,7 +1985,6 @@ class UAS_ShotManager_ShotRemoveMultiple(Operator):
             if not self.skipDialogBox:
                 prefs.removeShot_deleteCameras = self.deleteCameras
 
-        #  print(" ** removed shots, len(props.get_shots()): ", len(props.get_shots()))
 
         return {"INTERFACE"}
 
