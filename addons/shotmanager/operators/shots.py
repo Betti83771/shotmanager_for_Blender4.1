@@ -1159,6 +1159,7 @@ class UAS_ShotManager_ShotDuplicate(Operator):
 
         
     def custom_retime(self, offset):
+        """unused for now"""
         for ac in bpy.data.actions:
             # skip orphan actions and actions with fake user
             if (ac.users < 1) or (ac.users ==1 and ac.use_fake_user):
@@ -1261,36 +1262,36 @@ class UAS_ShotManager_ShotDuplicate(Operator):
                     "point_co": Vector((float(range_start), fc.evaluate(range_start))),
                     "point_type": 'BEZIER',
                     "handle_l_co": Vector((float(range_start), fc.evaluate(range_start-handle_offset))),
-                    "handle_l_type": 'VECTOR',
+                    "handle_l_type": 'AUTO_CLAMPED',
                     "handle_r_co": Vector((float(range_start), fc.evaluate(range_start+handle_offset))),
-                    "handle_r_type": 'VECTOR'
+                    "handle_r_type": 'AUTO_CLAMPED'
                     }
                 data[fc].append(start_data)
                 end_data = {
                     "point_co": Vector((float(range_end), fc.evaluate(range_end))),
                     "point_type": 'BEZIER',
                     "handle_l_co": Vector((float(range_end), fc.evaluate(range_end-handle_offset))),
-                    "handle_l_type": 'VECTOR',
+                    "handle_l_type": 'AUTO_CLAMPED',
                     "handle_r_co": Vector((float(range_end), fc.evaluate(range_end+handle_offset))),
-                    "handle_r_type": 'VECTOR'
+                    "handle_r_type": 'AUTO_CLAMPED'
                     }
                 data[fc].append(end_data)
-                print("end_data",end_data["point_co"])
+              #  print("end_data",end_data["point_co"], fc.data_path, fc.array_index)
                 
 
                 # put all the keyframes in range in the data dict
                 for kf in fc.keyframe_points:
                     if kf.co.x <= range_end and kf.co.x >= range_start:
                         kf_data = {
-                            "point_co": kf.co,
+                            "point_co": kf.co.copy(),
                             "point_type": kf.interpolation,
-                            "handle_l_co": kf.handle_left,
+                            "handle_l_co": kf.handle_left.copy(),
                             "handle_l_type": kf.handle_left_type,
-                            "handle_r_co": kf.handle_right,
+                            "handle_r_co": kf.handle_right.copy(),
                             "handle_r_type": kf.handle_right_type
                         }
                         data[fc].append(kf_data)
-                        print(kf_data["point_co"])
+                        
                 
 
         
@@ -1310,7 +1311,14 @@ class UAS_ShotManager_ShotDuplicate(Operator):
                             orig_range_start:int,
                             orig_range_end:int,):
         
-         # retime to free target range
+        # insert keyframe at start-1 and start+1 of target range, so the retimer will put them at start and end of target
+        for fc in data.keys():
+            self.keyframe_at_frame(fc, tg_range_start-1)
+            fc.update()
+            self.keyframe_at_frame(fc, tg_range_start+1)
+            fc.update()
+        
+        # retime to free target range
         props = config.getAddonProps(context.scene)
         retimerApplyToSettings = props.retimer.getCurrentApplyToSettings()
         retimerApplyToSettings.initialize('SCENE')
@@ -1325,19 +1333,17 @@ class UAS_ShotManager_ShotDuplicate(Operator):
             factor=1.0,
             pivot=tg_range_start,
         )
-
+        
         for fc in data.keys():
-            # insert keyframe at start-1 and end+1 of target range
-            self.keyframe_at_frame(fc, tg_range_start-1)
-            fc.update()
-            self.keyframe_at_frame(fc, tg_range_end+1)
-            fc.update()
+            
             offset = tg_range_start-orig_range_start
             stretch = float(round((tg_range_end-tg_range_start)/(orig_range_end-orig_range_start)))
-            print(stretch, tg_range_end-tg_range_start, orig_range_end-orig_range_start)
-
+        
+            
             # insert all keyframes from dictionary
             for kf_data in data[fc]:
+                if fc == bpy.data.actions['Cam_SH0010Action'].fcurves[0]:
+                    print(kf_data["point_co"])
                 nkey = self.keyframe_at_frame(fc, (int(kf_data["point_co"].x)*stretch)  +  offset)
                 nkey.co.y = kf_data["point_co"].y
                 nkey.interpolation = kf_data["point_type"]
@@ -1345,10 +1351,12 @@ class UAS_ShotManager_ShotDuplicate(Operator):
                 nkey.handle_left = Vector(((kf_data["handle_l_co"].x)*stretch  + offset, kf_data["handle_l_co"].y))
                 nkey.handle_right_type = kf_data["handle_r_type"]
                 nkey.handle_right = Vector((kf_data["handle_r_co"].x + (offset*stretch), kf_data["handle_r_co"].y))
+                if fc == bpy.data.actions['Cam_SH0010Action'].fcurves[0]:
+                    print("afeter ",  nkey.co)
+
                 fc.update()
+                    
                 
-            
-        return
 
     def execute(self, context):
         props = config.getAddonProps(context.scene)
@@ -1376,14 +1384,14 @@ class UAS_ShotManager_ShotDuplicate(Operator):
             newShot.start = context.scene.frame_current
             newShot.end = newShot.start + selectedShot.end - selectedShot.start
 
-        if self.useDifferentColor:
-            if props.use_camera_color:
-                newShot.camera.color = slightlyRandomizeColor(selectedShot.camera.color, weight=0.55)
+       #S if self.useDifferentColor:
+           # if props.use_camera_color:
+               # newShot.camera.color = slightlyRandomizeColor(selectedShot.camera.color, weight=0.55)
 
-        # if self.duplicateCam and newShot.camera is not None:
-        #     newCam = utils.duplicateObject(newShot.camera)
-        #     newCam.name = self.camName
-        #     newShot.camera = newCam
+        if self.duplicateCam and newShot.camera is not None:
+             newCam = utils.duplicateObject(newShot.camera)
+             newCam.name = self.camName
+             newShot.camera = newCam
 
         props.setCurrentShotByIndex(newShotInd, setCamToViewport=False)
         props.setSelectedShotByIndex(newShotInd)
