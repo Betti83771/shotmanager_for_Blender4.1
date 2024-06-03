@@ -1210,7 +1210,8 @@ class UAS_ShotManager_ShotDuplicate(Operator):
     def copy_shot_keyframes(self, 
                             context, 
                             range_start:int, 
-                            range_end:int, 
+                            range_end:int,
+                            exclude_cameras=True 
                             )->tuple[dict, dict]:
         """Returns the copied keyframe information in a dictionary
         data ={ fcurve: [
@@ -1239,26 +1240,33 @@ class UAS_ShotManager_ShotDuplicate(Operator):
         # D.actions contains object and armature actions, shape key actions, shader node tree actions (materials and gp materials),
         # compositing nodetree actions, movie clip actions
         # We only need actions of current scene
-        ad_list = [obj.animation_data for obj in context.scene.objects]
+        ad_list = []
 
         
 
         for obj in context.scene.objects:
-            ad_list.append(obj.animation_data)
 
             # grease pencils: 
             if self.ca_copy_gp_frames:
                 if obj.type == 'GPENCIL':
                     # exclude is some other shot.
-                    if obj.parent.parent.type=='CAMERA':
-                        if obj != associated_gp:
-                            continue
+                    if obj.parent:
+                        if obj.parent.parent:
+                            if obj.parent.parent.type=='CAMERA':
+                                if obj != associated_gp:
+                                    continue
                     for layer in obj.data.layers:
                         gp_data[layer] = []
                         for frame in layer.frames:
                             gp_data[layer].append((frame , frame.frame_number))
 
-
+            # exclude shot cameras
+            if exclude_cameras:
+                if obj.type=='CAMERA':
+                    shotsUsingCam = props.getShotsUsingCamera(obj)
+                    if len(shotsUsingCam) > 0:
+                        continue
+            
             # animated materials
             for matSlot in obj.material_slots:
                 if matSlot is not None:
@@ -1269,6 +1277,8 @@ class UAS_ShotManager_ShotDuplicate(Operator):
                         ad2 = matSlot.material.node_tree.animation_data
                         if ad2 is not None and ad2 not in ad_list:
                             ad_list.append(ad2)
+            
+            ad_list.append(obj.animation_data)
             try:
                 ad_list.append(obj.data.animation_data)
             except AttributeError:
@@ -1337,7 +1347,8 @@ class UAS_ShotManager_ShotDuplicate(Operator):
                             tg_range_start:int, 
                             tg_range_end:int,
                             orig_range_start:int,
-                            orig_range_end:int,):
+                            orig_range_end:int,
+                            retime_exclude=[]):
         
         # insert keyframe at start-1 and start+1 of target range, so the retimer will put them at start and end of target
         for fc in data.keys():
@@ -1351,10 +1362,12 @@ class UAS_ShotManager_ShotDuplicate(Operator):
         retimerApplyToSettings = props.retimer.getCurrentApplyToSettings()
         retimerApplyToSettings.initialize('SCENE')
         retimerApplyToSettings.applyToStoryboardShotRanges = True
+       
+        objs_to_retime = [obj for obj in context.scene.objects if obj not in retime_exclude]
         retimer.retimeScene(
             context=context,
             retimeMode="INSERT",
-            objects=context.scene.objects,
+            objects=objs_to_retime,
             start_incl=tg_range_start,
             duration_incl=tg_range_end-tg_range_start,
             retimerApplyToSettings=retimerApplyToSettings,
@@ -1365,7 +1378,7 @@ class UAS_ShotManager_ShotDuplicate(Operator):
         for fc in data.keys():
             
             offset = tg_range_start-orig_range_start
-            stretch = float(round((tg_range_end-tg_range_start)/(orig_range_end-orig_range_start)))
+            stretch = float(round((tg_range_end-tg_range_start+1)/(orig_range_end-orig_range_start+1)))
         
             
             # insert all keyframes from dictionary
@@ -1385,7 +1398,26 @@ class UAS_ShotManager_ShotDuplicate(Operator):
                     newf = layer.frames.copy(frame)
                     newf.frame_number = int((fn*stretch) + offset)
                     
-                
+    def shift_camera_animation(self, 
+                               camera, 
+                               old_start, 
+                               old_end, 
+                               new_start, 
+                               new_duration):
+        ad = camera.animation_data
+        if not ad:
+            return
+        if not ad.action:
+            return
+        stretch = float(round((new_duration)/(old_end-old_start+1)))
+        for fc in ad.action.fcurves:
+            for kf in fc.keyframe_points:
+                xco =  kf.co.x
+                if xco <= old_end and xco >= old_start:
+                    kf.co.x = (xco*stretch) + new_start
+            print(xco)
+            fc.update()
+
 
     def execute(self, context):
         props = config.getAddonProps(context.scene)
@@ -1395,12 +1427,17 @@ class UAS_ShotManager_ShotDuplicate(Operator):
         if selectedShot is None:
             return {"CANCELLED"}
 
+        rtc_start = selectedShot.start # range to copy
+        rtc_end = selectedShot.end
         newShotInd = len(props.get_shots()) if self.addToEndOfList else selectedShotInd + 1
+        if self.duplicateCam:
+            retime_exclude=[selectedShot.camera]
+        else:
+            retime_exclude=[]
         if self.copy_animation:
-            rtc_start = selectedShot.start # range to copy
-            rtc_end = selectedShot.end
             data, gp_data =self.copy_shot_keyframes(context, rtc_start, rtc_end)
-            self.paste_shot_keyframes(context, data, gp_data, self.new_range_start, self.new_range_end, rtc_start, rtc_end)
+            self.paste_shot_keyframes(context, data, gp_data, self.new_range_start, self.new_range_end, rtc_start, rtc_end,
+                                      retime_exclude=retime_exclude)
 
         copyGreasePencil = self.duplicateCam and self.duplicateStoryboardFrame
         newShot = props.copyShot(
@@ -1410,18 +1447,25 @@ class UAS_ShotManager_ShotDuplicate(Operator):
 
         # newShot.name = props.getUniqueShotName(self.name)
         newShot.name = self.name
-        if self.startAtCurrentTime:
-            newShot.start = context.scene.frame_current
-            newShot.end = newShot.start + selectedShot.end - selectedShot.start
-
+        
        #S if self.useDifferentColor:
            # if props.use_camera_color:
                # newShot.camera.color = slightlyRandomizeColor(selectedShot.camera.color, weight=0.55)
 
+
         if self.duplicateCam and newShot.camera is not None:
-             newCam = utils.duplicateObject(newShot.camera)
-             newCam.name = self.camName
-             newShot.camera = newCam
+            newCam = utils.duplicateObject(newShot.camera)
+            newCam.name = self.camName
+            newShot.camera = newCam
+
+            #When creating a new camera by duplicating, the animation should be shifted to the new range.
+            self.shift_camera_animation( newCam,
+                                        rtc_start, 
+                                        rtc_end, 
+                                        self.new_range_start, 
+                                        self.new_range_end - self.new_range_start +1)
+            
+        # shift the old ccamera if necessary to account for retimer
 
         props.setCurrentShotByIndex(newShotInd, setCamToViewport=False)
         props.setSelectedShotByIndex(newShotInd)
