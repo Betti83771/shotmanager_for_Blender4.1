@@ -48,7 +48,7 @@ _logger = sm_logging.getLogger(__name__)
 
 class UAS_PT_ShotManager(Panel):
     #    bl_label = f"Shot Manager {'.'.join ( str ( v ) for v in bl_info[ 'version'] ) }"
-    bl_label = f"{utils_shot_manager.getUbisoftName()} Shot Manager  V. {utils.addonVersion('Ubisoft Shot Manager')[0]}"
+    bl_label = f'Eddy Kitsu & Shot Manager V. {utils.addonVersion("Eddy Shot Manager")[0]}'
     bl_idname = "UAS_PT_Shot_Manager"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
@@ -123,11 +123,7 @@ class UAS_PT_ShotManager(Panel):
             "uas_shot_manager.go_to_video_tracks", text="", icon="SEQ_STRIP_DUPLICATE"
         ).vseSceneName = "SM_CheckSequence"
 
-        row.separator(factor=0.5)
-        icon = config.icons_col["General_Explorer_32"]
-        row.operator("uas_shot_manager.open_explorer", text="", icon_value=icon.icon_id).path = bpy.path.abspath(
-            bpy.data.filepath
-        )
+        
 
         row.separator(factor=0.5)
         row.menu("UAS_MT_Shot_Manager_prefs_mainmenu", icon="PREFERENCES", text="")
@@ -345,9 +341,22 @@ class UAS_PT_ShotManager(Panel):
         ################
         if props.dontRefreshUI():
             layout.separator(factor=0.4)
-            return None
+            return 
 
         utils_ui.separatorLine(layout, padding_bottom=0.8, padding_top=0.6)
+
+        ################
+        #  Import from Kitsu
+        ################
+        row = layout.row()
+        col = row.column(align=True)
+        
+        if props.kitsu_current_file_path != "This is not a Kitsu file!":
+            col.label(text=f"Kitsu file: {props.kitsu_current_file_path}") 
+            col.operator("uas_shot_manager.gen_shots_from_kitsu")
+        else:
+            col.operator("uas_shot_manager.build_scene_file_from_kitsu")
+            col.operator("uas_shot_manager.open_kitsu_scene_file")
 
         # sequence name
         ################
@@ -367,8 +376,10 @@ class UAS_PT_ShotManager(Panel):
 
         # sequence name
         #####################
-
-        if props.use_project_settings:
+        seqnamerow = rightsplitrow.row(align=True)
+        leftrow.label(text=context.scene.kitsu.sequence_active_name)
+        seqcol.label(text=f"Scene: {context.scene.kitsu.scene_active_name}" )
+        """if props.use_project_settings:
             # rightsplitrow.prop(props, "sequence_name", text="")
             # props.getSequenceName("SHORT")
             seqnamerow = rightsplitrow.row(align=True)
@@ -376,7 +387,7 @@ class UAS_PT_ShotManager(Panel):
             seqnamerow.prop(prefs, "projectSeqName", text="")
             rightsplitrow.operator("uas_shot_manager.set_project_sequence_name", text="", icon="SYNTAX_OFF")
         else:
-            rightsplitrow.prop(props, "sequence_name", text="")
+            rightsplitrow.prop(props, "sequence_name", text="")"""
 
         subnamerow = rightsplit.row(align=True)
         subnamerow.separator(factor=0.2)
@@ -453,186 +464,187 @@ class UAS_PT_ShotManager(Panel):
 
         # takes
         ################
-        panelIcon = "TRIA_DOWN" if prefs.take_properties_expanded else "TRIA_RIGHT"
-        takeHasNotes = False
-        if currentTake is not None:
-            takeHasNotes = currentTake.hasNotes()
+        if currentLayout.display_notes_in_properties:
+            panelIcon = "TRIA_DOWN" if prefs.take_properties_expanded else "TRIA_RIGHT"
+            takeHasNotes = False
+            if currentTake is not None:
+                takeHasNotes = currentTake.hasNotes()
 
-        box = layout.box()
-        row = box.row(align=False)
+            box = layout.box()
+            row = box.row(align=False)
 
-        # if currentLayout.display_globaleditintegr_in_properties or currentLayout.display_notes_in_properties or currentLayout.display_takerendersettings_in_properties or takeHasNotes:
-        display_take_arrow = (
-            currentLayout.display_globaleditintegr_in_properties
-            or currentLayout.display_takerendersettings_in_properties
-        )
-        if display_take_arrow:
-            # utils_ui.collapsable_panel(row, prefs, "take_properties_expanded")     # doesn't improve the UI
-            arrowRow = row.row()
-            arrowRow.scale_x = 0.9
-            arrowRow.prop(prefs, "take_properties_expanded", text="", icon_only=True, icon=panelIcon, emboss=False)
+            # if currentLayout.display_globaleditintegr_in_properties or currentLayout.display_notes_in_properties or currentLayout.display_takerendersettings_in_properties or takeHasNotes:
+            display_take_arrow = (
+                currentLayout.display_globaleditintegr_in_properties
+                or currentLayout.display_takerendersettings_in_properties
+            )
+            if display_take_arrow:
+                # utils_ui.collapsable_panel(row, prefs, "take_properties_expanded")     # doesn't improve the UI
+                arrowRow = row.row()
+                arrowRow.scale_x = 0.9
+                arrowRow.prop(prefs, "take_properties_expanded", text="", icon_only=True, icon=panelIcon, emboss=False)
 
-        leftrow = row.row()
-        leftrow.alignment = "LEFT"
-        # leftrow.scale_x = 0.81 if display_take_arrow else 1.16
+            leftrow = row.row()
+            leftrow.alignment = "LEFT"
+            # leftrow.scale_x = 0.81 if display_take_arrow else 1.16
 
-        if display_take_arrow:
-            arrowScale_x = 1.0 if currentLayout.display_advanced_infos else 0.9
-        else:
-            arrowScale_x = 1.0 if currentLayout.display_advanced_infos else 0.9
-        leftrow.scale_x = arrowScale_x
-
-        takeStr = (
-            "Take:"
-            if not currentLayout.display_advanced_infos
-            else f"Take ({currentTakeInd + 1}/{props.getNumTakes()}):"
-        )
-        leftrow.label(text=takeStr)
-
-        subrow = row.row(align=True)
-        #    row.scale_y = 1.5
-        subrow.scale_x = 2.0
-
-        subsubrow = subrow.row(align=True)
-        subsubrow.scale_x = 0.8
-        # subsubrow.use_property_split = True
-
-        if currentTake is not None:
-
-            # reduce space between buttons:
-            # if currentTake.overrideRenderSettings or takeHasNotes or currentLayout.display_notes_in_properties:
-
-            if currentTake.overrideRenderSettings:
-                # overrideRow = subsubrow.row()
-                # overrideRow.alert = True
-                # overrideRow.scale_x = 0.4
-                # overrideRow.label(text="Ov.")
-
-                # overrideRow.alert = True
-                overIcon = "DECORATE_OVERRIDE"
-                subsubrow.prop(
-                    prefs,
-                    "take_renderSettings_expanded",
-                    text="",
-                    emboss=prefs.take_renderSettings_expanded,
-                    # emboss=True,
-                    icon=overIcon,
-                )
-
-            if takeHasNotes:
-                icon = config.icons_col["ShotManager_NotesData_32"]
-                subsubrow.prop(
-                    prefs, "take_notes_expanded", text="", emboss=prefs.take_notes_expanded, icon_value=icon.icon_id
-                )
+            if display_take_arrow:
+                arrowScale_x = 1.0 if currentLayout.display_advanced_infos else 0.9
             else:
-                if currentLayout.display_notes_in_properties:
-                    icon = config.icons_col["ShotManager_NotesNoData_32"]
+                arrowScale_x = 1.0 if currentLayout.display_advanced_infos else 0.9
+            leftrow.scale_x = arrowScale_x
+
+            takeStr = (
+                "Take:"
+                if not currentLayout.display_advanced_infos
+                else f"Take ({currentTakeInd + 1}/{props.getNumTakes()}):"
+            )
+            leftrow.label(text=takeStr)
+
+            subrow = row.row(align=True)
+            #    row.scale_y = 1.5
+            subrow.scale_x = 2.0
+
+            subsubrow = subrow.row(align=True)
+            subsubrow.scale_x = 0.8
+            # subsubrow.use_property_split = True
+
+            if currentTake is not None:
+
+                # reduce space between buttons:
+                # if currentTake.overrideRenderSettings or takeHasNotes or currentLayout.display_notes_in_properties:
+
+                if currentTake.overrideRenderSettings:
+                    # overrideRow = subsubrow.row()
+                    # overrideRow.alert = True
+                    # overrideRow.scale_x = 0.4
+                    # overrideRow.label(text="Ov.")
+
+                    # overrideRow.alert = True
+                    overIcon = "DECORATE_OVERRIDE"
+                    subsubrow.prop(
+                        prefs,
+                        "take_renderSettings_expanded",
+                        text="",
+                        emboss=prefs.take_renderSettings_expanded,
+                        # emboss=True,
+                        icon=overIcon,
+                    )
+
+                if takeHasNotes:
+                    icon = config.icons_col["ShotManager_NotesData_32"]
                     subsubrow.prop(
                         prefs, "take_notes_expanded", text="", emboss=prefs.take_notes_expanded, icon_value=icon.icon_id
                     )
-                    # emptyIcon = config.icons_col["General_Empty_32"]
-                    # row.operator(
-                    #     "uas_shot_manager.shots_shownotes", text="", icon_value=emptyIcon.icon_id
-                    # ).index = index
+                else:
+                    if currentLayout.display_notes_in_properties:
+                        icon = config.icons_col["ShotManager_NotesNoData_32"]
+                        subsubrow.prop(
+                            prefs, "take_notes_expanded", text="", emboss=prefs.take_notes_expanded, icon_value=icon.icon_id
+                        )
+                        # emptyIcon = config.icons_col["General_Empty_32"]
+                        # row.operator(
+                        #     "uas_shot_manager.shots_shownotes", text="", icon_value=emptyIcon.icon_id
+                        # ).index = index
 
-        subrow.prop(props, "current_take_name", text="")
-        #    row.menu(UAS_MT_ShotManager_Takes_ToolsMenu.bl_idname,text="Tools",icon='TOOL_SETTINGS')
+            subrow.prop(props, "current_take_name", text="")
+            #    row.menu(UAS_MT_ShotManager_Takes_ToolsMenu.bl_idname,text="Tools",icon='TOOL_SETTINGS')
 
-        timerow = row.row(align=True)
-        timerow.alignment = "RIGHT"
-        timerow.scale_x = enlargeButs
-        timerow.operator("uas_shot_manager.scenerangefromtake", text="", icon="PREVIEW_RANGE")
+            timerow = row.row(align=True)
+            timerow.alignment = "RIGHT"
+            timerow.scale_x = enlargeButs
+            timerow.operator("uas_shot_manager.scenerangefromtake", text="", icon="PREVIEW_RANGE")
 
-        # row = row.row(align=False)
-        row.menu("UAS_MT_Shot_Manager_takes_toolsmenu", icon="TOOL_SETTINGS", text="")
+            # row = row.row(align=False)
+            row.menu("UAS_MT_Shot_Manager_takes_toolsmenu", icon="TOOL_SETTINGS", text="")
 
-        if prefs.take_properties_expanded:
-            #  row = box.row()
-            #  row.label(text="Take Properties:")
+            if prefs.take_properties_expanded:
+                #  row = box.row()
+                #  row.label(text="Take Properties:")
 
-            # Global edit
+                # Global edit
+                ######################
+                if currentLayout.display_globaleditintegr_in_properties:
+                    subBox = box.box()
+                    subRow = subBox.row()
+                    subRow.separator()
+                    subRow.prop(currentTake, "globalEditDirectory", text="Edit Dir")
+                    subRow = subBox.row()
+                    subRow.separator()
+                    subRow.prop(currentTake, "globalEditVideo", text="Edit Animatic")
+                    subRow = subBox.row()
+                    subRow.separator()
+                    subRow.prop(currentTake, "startInGlobalEdit", text="Start in Global Edit")
+
+                if currentLayout.display_globaleditintegr_in_properties:
+                    box.separator(factor=0.2)
+
+            # Render settings properties
             ######################
-            if currentLayout.display_globaleditintegr_in_properties:
+            # if currentLayout.display_takerendersettings_in_properties:
+            if currentTake is not None and (
+                (currentLayout.display_takerendersettings_in_properties and prefs.take_properties_expanded)
+                or (currentLayout.display_takerendersettings_in_properties and prefs.take_renderSettings_expanded)
+                or (currentTake.overrideRenderSettings and prefs.take_renderSettings_expanded)
+                # or (takeHasNotes and prefs.take_properties_expanded)
+            ):
+                panelIcon = "TRIA_DOWN" if prefs.take_renderSettings_expanded else "TRIA_RIGHT"
+
                 subBox = box.box()
-                subRow = subBox.row()
-                subRow.separator()
-                subRow.prop(currentTake, "globalEditDirectory", text="Edit Dir")
-                subRow = subBox.row()
-                subRow.separator()
-                subRow.prop(currentTake, "globalEditVideo", text="Edit Animatic")
-                subRow = subBox.row()
-                subRow.separator()
-                subRow.prop(currentTake, "startInGlobalEdit", text="Start in Global Edit")
+                subBox.use_property_decorate = False
+                titleRow = subBox.row()
+                titleRow.prop(prefs, "take_renderSettings_expanded", text="", icon=panelIcon, emboss=False)
+                titleRow.label(text="Take Render Settings:")
 
-            if currentLayout.display_globaleditintegr_in_properties:
-                box.separator(factor=0.2)
+                # overSubRow = subRow.split(factor=0.05)
+                overSubRow = titleRow.row(align=True)
+                if currentTake.overrideRenderSettings:
+                    overSubRow.alert = True
+                overSubRow.prop(currentTake, "overrideRenderSettings", text="")
+                overSubRow.label(
+                    text="Override " + ("Project" if props.use_project_settings else "Scene") + " Render Settings"
+                )
 
-        # Render settings properties
-        ######################
-        # if currentLayout.display_takerendersettings_in_properties:
-        if currentTake is not None and (
-            (currentLayout.display_takerendersettings_in_properties and prefs.take_properties_expanded)
-            or (currentLayout.display_takerendersettings_in_properties and prefs.take_renderSettings_expanded)
-            or (currentTake.overrideRenderSettings and prefs.take_renderSettings_expanded)
-            # or (takeHasNotes and prefs.take_properties_expanded)
-        ):
-            panelIcon = "TRIA_DOWN" if prefs.take_renderSettings_expanded else "TRIA_RIGHT"
+                if prefs.take_renderSettings_expanded:
+                    subSubBoxRow = subBox.row()
+                    subSubBoxRow.separator(factor=1)
+                    subSubBox = subSubBoxRow.column()
+                    # subSubBox.separator(factor=2)
+                    currentTake.outputParams_Resolution.draw(context, subSubBox, enabled=currentTake.overrideRenderSettings)
 
-            subBox = box.box()
-            subBox.use_property_decorate = False
-            titleRow = subBox.row()
-            titleRow.prop(prefs, "take_renderSettings_expanded", text="", icon=panelIcon, emboss=False)
-            titleRow.label(text="Take Render Settings:")
+            # Notes
+            ######################
+            if currentTake is not None and (
+                (currentLayout.display_notes_in_properties and prefs.take_properties_expanded)
+                or (currentLayout.display_notes_in_properties and prefs.take_notes_expanded)
+                or (takeHasNotes and prefs.take_notes_expanded)
+                # or (takeHasNotes and prefs.take_properties_expanded)
+            ):
+                # or (currentLayout.display_notes_in_properties and prefs.take_properties_expanded)
+                # ):
+                panelIcon = "TRIA_DOWN" if prefs.take_notes_expanded else "TRIA_RIGHT"
 
-            # overSubRow = subRow.split(factor=0.05)
-            overSubRow = titleRow.row(align=True)
-            if currentTake.overrideRenderSettings:
-                overSubRow.alert = True
-            overSubRow.prop(currentTake, "overrideRenderSettings", text="")
-            overSubRow.label(
-                text="Override " + ("Project" if props.use_project_settings else "Scene") + " Render Settings"
-            )
+                subBox = box.box()
+                subBox.use_property_decorate = False
+                titleRow = subBox.row()
+                titleRow.prop(prefs, "take_notes_expanded", text="", icon=panelIcon, emboss=False)
+                # row.separator(factor=1.0)
+                c = titleRow.column()
+                # grid_flow = c.grid_flow(align=False, columns=3, even_columns=False)
+                subrow = c.row()
+                subrow.label(text="Take Notes:")
+                subrow.separator(factor=0.5)  # prevents strange look when panel is narrow
 
-            if prefs.take_renderSettings_expanded:
-                subSubBoxRow = subBox.row()
-                subSubBoxRow.separator(factor=1)
-                subSubBox = subSubBoxRow.column()
-                # subSubBox.separator(factor=2)
-                currentTake.outputParams_Resolution.draw(context, subSubBox, enabled=currentTake.overrideRenderSettings)
-
-        # Notes
-        ######################
-        if currentTake is not None and (
-            (currentLayout.display_notes_in_properties and prefs.take_properties_expanded)
-            or (currentLayout.display_notes_in_properties and prefs.take_notes_expanded)
-            or (takeHasNotes and prefs.take_notes_expanded)
-            # or (takeHasNotes and prefs.take_properties_expanded)
-        ):
-            # or (currentLayout.display_notes_in_properties and prefs.take_properties_expanded)
-            # ):
-            panelIcon = "TRIA_DOWN" if prefs.take_notes_expanded else "TRIA_RIGHT"
-
-            subBox = box.box()
-            subBox.use_property_decorate = False
-            titleRow = subBox.row()
-            titleRow.prop(prefs, "take_notes_expanded", text="", icon=panelIcon, emboss=False)
-            # row.separator(factor=1.0)
-            c = titleRow.column()
-            # grid_flow = c.grid_flow(align=False, columns=3, even_columns=False)
-            subrow = c.row()
-            subrow.label(text="Take Notes:")
-            subrow.separator(factor=0.5)  # prevents strange look when panel is narrow
-
-            if prefs.take_notes_expanded:
-                row = subBox.row()
-                row.separator(factor=1.0)
-                col = row.column()
-                col.scale_y = 0.95
-                col.prop(currentTake, "note01", text="")
-                col.prop(currentTake, "note02", text="")
-                col.prop(currentTake, "note03", text="")
-                row.separator(factor=1.0)
-                subBox.separator(factor=0.1)
+                if prefs.take_notes_expanded:
+                    row = subBox.row()
+                    row.separator(factor=1.0)
+                    col = row.column()
+                    col.scale_y = 0.95
+                    col.prop(currentTake, "note01", text="")
+                    col.prop(currentTake, "note02", text="")
+                    col.prop(currentTake, "note03", text="")
+                    row.separator(factor=1.0)
+                    subBox.separator(factor=0.1)
 
         # shots
         ################

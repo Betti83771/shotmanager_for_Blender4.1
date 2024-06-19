@@ -25,17 +25,19 @@ from .install_and_register import register_addon
 
 
 bl_info = {
-    "name": "Ubisoft Shot Manager",
-    "author": "Ubisoft - Julien Blervaque (aka Werwack), Romain Carriquiry Borchiari",
-    "description": "Easily manage shots and cameras in the 3D View and see the resulting edit in real-time",
-    "blender": (3, 3, 0),
-    "version": (2, 1, 46),
+    "name": "Eddy Shot Manager",
+    "author": """ Eddy - Betti Abbattista
+Shotmanager: Ubisoft - Julien Blervaque (aka Werwack), Romain Carriquiry Borchiari
+Blender Kitsu: Blender Foundation - Paul Golter""",
+    "description": "Customized pipeline tool for previz at Eddy Studio",
+    "blender": (4, 0, 0),
+    "version": (1, 0, 0),
     "location": "View3D > Shot Mng",
-    "doc_url": "https://ubisoft-shotmanager.readthedocs.io",
-    "tracker_url": "https://github.com/ubisoft/shotmanager/issues",
+    "doc_url": "",
+    "tracker_url": "",
     # "warning": "BETA Version",
     # "warning": "Pre-Release",
-    "category": "Ubisoft",
+    "category": "Eddy",
 }
 
 __version__ = ".".join(str(i) for i in bl_info["version"])

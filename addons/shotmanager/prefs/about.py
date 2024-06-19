@@ -79,7 +79,7 @@ class UAS_ShotManager_OT_About(Operator):
 
         # Documentation
         ###############
-        row = box.row()
+        """ row = box.row()
         row.label(text="Documentation:")
         row = box.row()
         row.separator()
@@ -95,7 +95,7 @@ class UAS_ShotManager_OT_About(Operator):
         doc_op.path = "https://www.youtube.com/channel/UCF6RsOpvCUGQozRlOO_-dDQ"
         doc_op.tooltip = "Watch video tutorials on Youtube: " + doc_op.path
 
-        box.separator(factor=0.5)
+        box.separator(factor=0.5)"""
 
         # Dependencies
         ###############

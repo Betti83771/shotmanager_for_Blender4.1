@@ -169,7 +169,7 @@ class UAS_ShotManager_Props(MontageInterface, PropertyGroup):
             - an integer. x.y.z becomes xxyyyzzz (eg: "1.21.3" becomes 1021003)
         Return None if the addon has not been found
         """
-        return utils.addonVersion("Ubisoft Shot Manager")
+        return utils.addonVersion("Eddy Shot Manager")
 
     dataVersion: IntProperty(
         """ Data Version is of the form xxyyyzzz, integer generated from the string version "xx.yyy.zzz"
@@ -2770,7 +2770,7 @@ class UAS_ShotManager_Props(MontageInterface, PropertyGroup):
         self["displayPlayblastProps"] = True
 
     displayStillProps: BoolProperty(
-        name="Display Still Preset Properties", get=get_displayStillProps, set=set_displayStillProps, default=True
+        name="Display Still Preset Properties", get=get_displayStillProps, set=set_displayStillProps, default=False
     )
     displayAnimationProps: BoolProperty(
         name="Display Animation Preset Properties",
@@ -2794,7 +2794,7 @@ class UAS_ShotManager_Props(MontageInterface, PropertyGroup):
         name="Display Playblast Preset Properties",
         get=get_displayPlayblastProps,
         set=set_displayPlayblastProps,
-        default=False,
+        default=True,
     )
 
     ####################
@@ -5270,6 +5270,21 @@ class UAS_ShotManager_Props(MontageInterface, PropertyGroup):
                                     #            print("lo")
                                     self.moveShotToIndex(shotFromName, i + 1)
                                     break
+
+    ######################
+    #  Kitsu
+
+    kitsu_current_file_path: StringProperty(name="Kitsu file path",
+                                             default="This is not a Kitsu file!",
+                                             subtype="FILE_PATH")
+    #kitsu_prod_base_path: StringProperty(name="Kitsu base project path",
+    #                                     description="The folder on your system where your Kitsu file paths start",
+    #                                         default="R:\\#EQUIPE\\b.abbattista\\Eddy\\Test_Blender_prod",
+   #                                          subtype="FILE_PATH")
+    
+    kitsu_current_scene: StringProperty()
+    kitsu_current_seq: StringProperty()
+   
 
 
 ###########################

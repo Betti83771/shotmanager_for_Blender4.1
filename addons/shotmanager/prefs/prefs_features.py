@@ -270,7 +270,7 @@ def draw_features_prefs(mode, layout):
     # notesIcon = "TEXT"
     # notesIcon = "WORDWRAP_OFF"
     subrow.prop(propsLayout, f"{layoutPrefix}display_notes_in_properties", text="", icon_value=icon.icon_id)
-    subrow.label(text="Takes and Shots Notes")
+    subrow.label(text="Takes and Shots")
 
     ################
     # Take render settings

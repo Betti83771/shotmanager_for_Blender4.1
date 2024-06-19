@@ -61,7 +61,7 @@ class UAS_ShotManager_ShotsGlobalSettings(PropertyGroup):
         max=1.0,
         step=0.1,
         update=_update_backgroundAlpha,
-        default=0.9,
+        default=0.5,
     )
 
     def _update_proxyRenderSize(self, context):

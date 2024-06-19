@@ -440,7 +440,7 @@ class UAS_ShotManager_UpdateDialog(Operator):
 
     def invoke(self, context, event):
         self.addonName = "Ubisoft Shot Manager"
-        self.url = "https://github.com/ubisoft/shotmanager/releases/latest"
+        self.url = "https://github.com/Betti83771/shotmanager_for_Blender4.1/releases/latest"
 
         return context.window_manager.invoke_props_dialog(self, width=450)
 

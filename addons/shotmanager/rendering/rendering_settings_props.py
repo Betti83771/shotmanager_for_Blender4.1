@@ -41,7 +41,7 @@ class UAS_ShotManager_RenderSettings(PropertyGroup):
             ("OTIO", "Otio", ""),
             ("PLAYBLAST", "PLAYBLAST", ""),
         ),
-        default="STILL",
+        default="PLAYBLAST",
     )
 
     # properties are initialized according to their use in the function props.createRenderSettings()

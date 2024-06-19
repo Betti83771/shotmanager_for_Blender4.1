@@ -94,7 +94,7 @@ class UAS_PT_ShotManager_Render(Operator):
             ("OTIO", "OTIO", ""),
             ("PLAYBLAST", "PLAYBLAST", ""),
         ),
-        default="STILL",
+        default="PLAYBLAST",
     )
 
     @classmethod

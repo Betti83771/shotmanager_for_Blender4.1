@@ -136,9 +136,9 @@ class UAS_UL_ShotManager_Items(bpy.types.UIList):
 
             grid_flow.scale_x = 0.4
             shotEditStart = item.getEditStart()
-            if currentFrame == item.start:
-                if props.highlight_all_shot_frames or current_shot_index == index:
-                    grid_flow.alert = True
+          #  if currentFrame == item.start:
+             #   if props.highlight_all_shot_frames or current_shot_index == index:
+              #      grid_flow.alert = True
             # grid_flow.prop(item, "start", text="")
             # grid_flow.label(text=str(shotDuration))
             grid_flow.operator("uas_shot_manager.shottimeinedit", text=str(shotEditStart)).shotSource = f"[{index},0]"
@@ -151,11 +151,11 @@ class UAS_UL_ShotManager_Items(bpy.types.UIList):
                 ).shotSource = f"[{index},0]"
 
             grid_flow.scale_x = 0.4
-            if currentFrame == item.start:
-                if props.highlight_all_shot_frames or current_shot_index == index:
-                    grid_flow.alert = True
+          #  if currentFrame == item.start:
+             #   if props.highlight_all_shot_frames or current_shot_index == index:
+                 #   grid_flow.alert = True
             grid_flow.prop(item, "start", text="")
-            grid_flow.alert = item.camera is None or itemHasWarnings
+          #  grid_flow.alert = item.camera is None or itemHasWarnings
 
         # duration
         ###########
@@ -172,9 +172,9 @@ class UAS_UL_ShotManager_Items(bpy.types.UIList):
                 toggle=True,
             )
 
-            if props.highlight_all_shot_frames or current_shot_index == index:
-                if item.start <= currentFrame and currentFrame <= item.end:
-                    grid_flow.alert = True
+           # if props.highlight_all_shot_frames or current_shot_index == index:
+            #    if item.start <= currentFrame and currentFrame <= item.end:
+              #      grid_flow.alert = True
 
             if props.display_duration_in_shotlist:
                 grid_flow.scale_x = 0.3
@@ -182,20 +182,20 @@ class UAS_UL_ShotManager_Items(bpy.types.UIList):
             else:
                 grid_flow.scale_x = 0.05
                 grid_flow.operator("uas_shot_manager.shot_duration", text="").index = index
-            grid_flow.alert = item.camera is None or itemHasWarnings
         else:
             grid_flow.scale_x = 1.5
+        
 
         # end
         ###########
         if props.display_edit_times_in_shotlist:
             grid_flow.scale_x = 0.4
             shotEditEnd = item.getEditEnd()
-            if currentFrame == item.end:
-                if props.highlight_all_shot_frames or current_shot_index == index:
-                    grid_flow.alert = True
+          #  if currentFrame == item.end:
+          #      if props.highlight_all_shot_frames or current_shot_index == index:
+         #           grid_flow.alert = True
             grid_flow.operator("uas_shot_manager.shottimeinedit", text=str(shotEditEnd)).shotSource = f"[{index},1]"
-            grid_flow.alert = False
+            grid_flow.alert = item.kitsu_altert_duration != item.getDuration()
 
             # grid_flow.scale_x = button_x_factor - 0.2
             # if display_getsetcurrentframe_in_shotlist:
@@ -204,11 +204,12 @@ class UAS_UL_ShotManager_Items(bpy.types.UIList):
             #     ).shotSource = f"[{index},1]"
         else:
             grid_flow.scale_x = 0.4
-            if currentFrame == item.end:
-                if props.highlight_all_shot_frames or current_shot_index == index:
-                    grid_flow.alert = True
+          #  if currentFrame == item.end:
+             #   if props.highlight_all_shot_frames or current_shot_index == index:
+                  #  grid_flow.alert = True
+            grid_flow.alert = item.kitsu_altert_duration != item.getDuration()
             grid_flow.prop(item, "end", text="")
-            grid_flow.alert = item.camera is None or itemHasWarnings
+          #  grid_flow.alert = item.camera is None or itemHasWarnings
 
             grid_flow.scale_x = button_x_factor - 0.2
             if display_getsetcurrentframe_in_shotlist:
@@ -220,6 +221,7 @@ class UAS_UL_ShotManager_Items(bpy.types.UIList):
             mainRow.separator(factor=0.8)
             row = mainRow.row(align=True)
             grid_flow = row.grid_flow(align=True, columns=2, even_columns=False)
+            grid_flow.alert = item.kitsu_altert_duration != item.getDuration()
             grid_flow.use_property_split = False
             # grid_flow.scale_x = button_x_factor - 0.1
             if props.display_duration_in_shotlist:
@@ -232,9 +234,9 @@ class UAS_UL_ShotManager_Items(bpy.types.UIList):
                 toggle=True,
             )
 
-            if props.highlight_all_shot_frames or current_shot_index == index:
-                if item.start <= currentFrame and currentFrame <= item.end:
-                    grid_flow.alert = True
+          #  if props.highlight_all_shot_frames or current_shot_index == index:
+             #   if item.start <= currentFrame and currentFrame <= item.end:
+                #    grid_flow.alert = True
 
             if props.display_duration_in_shotlist:
                 grid_flow.scale_x = 0.6
@@ -243,7 +245,8 @@ class UAS_UL_ShotManager_Items(bpy.types.UIList):
                 pass
                 # grid_flow.scale_x = 0.1
                 # grid_flow.operator("uas_shot_manager.shot_duration", text="").index = index
-            grid_flow.alert = False
+            
+            
 
         # camera
         ###########

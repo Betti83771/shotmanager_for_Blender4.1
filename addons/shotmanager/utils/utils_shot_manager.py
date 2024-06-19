@@ -80,7 +80,7 @@ def getStampInfo():
 
     # if getattr(scene, "UAS_SM_StampInfo_Settings", None) is None:
 
-    stampInfoInstalledVersion = utils.addonVersion("Ubisoft Shot Manager")
+    stampInfoInstalledVersion = utils.addonVersion("Eddy Shot Manager")
     if stampInfoInstalledVersion:
         stampInfoMinVersion = prefs.dependency_min_supported_version("Stamp Info")
         if stampInfoInstalledVersion[1] >= stampInfoMinVersion[1]:

@@ -208,7 +208,7 @@ def is_admin():
 def get_latest_release_version(url, verbose=False, use_debug=False):
     """Return a string with the latest release version available online on gitHub, None otherwise
     Args:
-        url eg: 'https://github.com/ubisoft/shotmanager/releases/latest'
+        url eg: 'https://github.com/Betti83771/shotmanager_for_Blender4.1/releases/latest'
     """
     latestReleaseVersion = None
 

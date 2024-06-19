@@ -28,6 +28,11 @@ from .. import handlers
 from ..handlers.sm_overlay_tools_handlers import install_handler_for_shot, toggle_overlay_tools_display
 from ..overlay_tools.workspace_info.workspace_info import toggle_workspace_info_display
 
+from ..kitsu_connection import auth
+from ..kitsu_connection import context
+from ..kitsu_connection import prefs as kitsu_prefs
+from ..kitsu_connection import props as kitsu_props
+
 from ..features import cameraBG
 from ..features import soundBG
 from ..features import greasepencil
@@ -35,6 +40,7 @@ from ..feature_panels.greasepencil_25D import greasepencil_25D_ui
 from ..features import storyboard
 
 from ..operators import takes
+from ..operators import kitsu
 from ..operators import shots
 from ..operators import shots_global_settings_operators
 
@@ -93,7 +99,7 @@ def register():
     logger_level = f"Logger level: {sm_logging.getLevelName()}"
     sm_logging.loggerFormatTest(message="Logger test message")
 
-    versionTupple = utils.display_addon_registered_version("Ubisoft Shot Manager", more_info=logger_level)
+    versionTupple = utils.display_addon_registered_version("Eddy Shot Manager", more_info=logger_level)
 
     from ..overlay_tools.workspace_info import workspace_info
 
@@ -179,7 +185,12 @@ def register():
     frame_grid.register()
     greasepencil_frame_usage_preset.register()
     greasepencil_frame_template.register()
+    kitsu_prefs.register()
     addon_prefs.register()
+    kitsu_props.register()
+
+    auth.register()
+    context.register()
 
     utils_operators.register()
     utils_operators_overlays.register()
@@ -195,6 +206,7 @@ def register():
     rendering.register()
     takes.register()
     shots.register()
+    kitsu.register()
     shots_global_settings.register()
     shots_global_settings_operators.register()
     precut_tools.register()
@@ -339,7 +351,7 @@ def register():
 
 def unregister():
 
-    utils.display_addon_registered_version("Ubisoft Shot Manager", unregister=True)
+    utils.display_addon_registered_version("Eddy Shot Manager", unregister=True)
 
     # marche pas
     _props = config.getAddonProps(bpy.context.scene)
@@ -417,6 +429,7 @@ def unregister():
     shots_global_settings.unregister()
     shots.unregister()
     takes.unregister()
+    kitsu.unregister()
 
     utils_operators_overlays.unregister()
     utils_operators.unregister()
@@ -427,7 +440,12 @@ def unregister():
     soundBG.unregister()
     cameraBG.unregister()
 
+    context.unregister()
+    auth.unregister()
+
     addon_prefs.unregister()
+    kitsu_prefs.unregister()
+    kitsu_props.unregister()
     greasepencil_frame_template.unregister()
     greasepencil_frame_usage_preset.unregister()
     frame_grid.unregister()

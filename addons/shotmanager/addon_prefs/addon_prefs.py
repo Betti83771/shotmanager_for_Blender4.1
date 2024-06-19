@@ -26,8 +26,10 @@ import bpy
 from bpy.types import AddonPreferences
 from bpy.props import StringProperty, IntProperty, BoolProperty, EnumProperty, FloatProperty, PointerProperty
 
+from ..kitsu_connection.prefs import KITSU_addon_preferences
 
 from .addon_prefs_ui import draw_addon_prefs
+from ..utils.utils_ui import collapsable_panel
 
 from shotmanager.features.greasepencil.greasepencil_frame_template import UAS_GreasePencil_FrameTemplate
 from shotmanager.utils import utils
@@ -97,7 +99,7 @@ class UAS_ShotManager_AddonPrefs(AddonPreferences):
             - an integer. x.y.z becomes xxyyyzzz (eg: "1.21.3" becomes 1021003)
         Return None if the addon has not been found
         """
-        return utils.addonVersion("Ubisoft Shot Manager")
+        return utils.addonVersion("Eddy Shot Manager")
 
     # def isReleaseVersion(self):
     #     """Return True if the current version is a released on"""
@@ -150,7 +152,7 @@ class UAS_ShotManager_AddonPrefs(AddonPreferences):
             versionStr = None
             _logger.debug_ext("Checking for updates online...", col="BLUE")
             versionStr = get_latest_release_version(
-                "https://github.com/ubisoft/shotmanager/releases/latest", verbose=True
+                "https://github.com/Betti83771/shotmanager_for_Blender4.1/releases/latest", verbose=True
             )
 
             if versionStr is not None:
@@ -247,7 +249,7 @@ class UAS_ShotManager_AddonPrefs(AddonPreferences):
         min=0.0,
         max=1.0,
         step=0.1,
-        default=1.0,
+        default=0.0,
     )
 
     storyboard_default_distanceFromOrigin: FloatProperty(
@@ -859,7 +861,7 @@ class UAS_ShotManager_AddonPrefs(AddonPreferences):
             ("OTIO", "OTIO", ""),
             ("PLAYBLAST", "PLAYBLAST", ""),
         ),
-        default="STILL",
+        default="PLAYBLAST",
     )
 
     # items=(list_target_takes)
@@ -1688,7 +1690,35 @@ class UAS_ShotManager_AddonPrefs(AddonPreferences):
     )
 
 
-_classes = (UAS_ShotManager_AddonPrefs,)
+    ########################################
+    # kitsu
+    ########################################
+
+class ShotManager_CombinedAddonPreferences(KITSU_addon_preferences, UAS_ShotManager_AddonPrefs ):
+    bl_idname = "shotmanager"
+
+    addonPrefs_kitsusettings_expanded: BoolProperty(
+        name="Expand Kitsu Settings",
+        default=True,
+    )
+    addonPrefs_shotmanagersettings_expanded: BoolProperty(
+        name="Expand Shotmanager Settings",
+        default=True,
+    )
+
+    def draw(self, context):
+        layout_main = self.layout
+        self.layout=layout_main.column()
+        collapsable_panel(self.layout, self, "addonPrefs_kitsusettings_expanded", text="Kitsu Settings")
+        if self.addonPrefs_kitsusettings_expanded:
+            KITSU_addon_preferences.draw(self, context)
+        self.layout=layout_main.column()
+        collapsable_panel(self.layout, self, "addonPrefs_shotmanagersettings_expanded", text="Shotmanager Settings")
+        if self.addonPrefs_shotmanagersettings_expanded:
+            UAS_ShotManager_AddonPrefs.draw(self, context)
+    
+
+_classes = (ShotManager_CombinedAddonPreferences,)
 
 
 def register():
@@ -1700,6 +1730,10 @@ def register():
 
 def unregister():
     _logger.debug_ext("       - Unregistering Add-on Preferences", form="UNREG")
+     # Log user out.
+    addon_prefs = bpy.context.preferences.addons[__package__.split(".")[0]].preferences
+    if addon_prefs.session.is_auth():
+        addon_prefs.session.end()
 
     for cls in reversed(_classes):
         bpy.utils.unregister_class(cls)

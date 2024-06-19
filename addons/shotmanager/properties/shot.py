@@ -250,7 +250,7 @@ class UAS_ShotManager_Shot(ShotInterface, PropertyGroup):
 
     end: IntProperty(
         name="Shot End",
-        description="Value of the last included frame of the shot.\nNote that end frame cannot be lower than start frame",
+    description="Value of the last included frame of the shot.\nNote that end frame cannot be lower than start frame. \n When displayed in red: the frame duration doesn't correspond to the duration on Kitsu",
         get=_get_end,
         set=_set_end,
         update=_update_end,
@@ -301,7 +301,7 @@ class UAS_ShotManager_Shot(ShotInterface, PropertyGroup):
     # fake property: value never used in itself, its purpose is to update ofher properties
     duration_fp: IntProperty(
         name="Shot Duration",
-        description="Duration is a frame number given by end - start + 1.\nIf set in the Shots Settings panel, the duration is displayed in red\nwhen the current time is in the shot range",
+        description="Duration is a frame number given by end - start + 1.\n When displayed in red: the frame duration doesn't correspond to the duration on Kitsu",
         min=1,
         get=_get_duration_fp,
         set=_set_duration_fp,
@@ -898,3 +898,10 @@ class UAS_ShotManager_Shot(ShotInterface, PropertyGroup):
 
     def get_frame_offset_end(self):
         return 0
+    
+
+    #############
+    # kitsu
+    ##########
+    kitsu_altert_start: IntProperty()
+    kitsu_altert_duration: IntProperty()
