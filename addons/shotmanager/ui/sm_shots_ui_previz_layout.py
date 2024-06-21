@@ -195,7 +195,8 @@ class UAS_UL_ShotManager_Items(bpy.types.UIList):
           #      if props.highlight_all_shot_frames or current_shot_index == index:
          #           grid_flow.alert = True
             grid_flow.operator("uas_shot_manager.shottimeinedit", text=str(shotEditEnd)).shotSource = f"[{index},1]"
-            grid_flow.alert = item.kitsu_altert_duration != item.getDuration()
+            if item.kitsu_altert_duration != -1:
+                grid_flow.alert = item.kitsu_altert_duration != item.getDuration()
 
             # grid_flow.scale_x = button_x_factor - 0.2
             # if display_getsetcurrentframe_in_shotlist:
@@ -207,7 +208,7 @@ class UAS_UL_ShotManager_Items(bpy.types.UIList):
           #  if currentFrame == item.end:
              #   if props.highlight_all_shot_frames or current_shot_index == index:
                   #  grid_flow.alert = True
-            grid_flow.alert = item.kitsu_altert_duration != item.getDuration()
+            grid_flow.alert = item.kitsu_altert_duration != item.getDuration() and item.kitsu_altert_duration != -1
             grid_flow.prop(item, "end", text="")
           #  grid_flow.alert = item.camera is None or itemHasWarnings
 
@@ -221,7 +222,8 @@ class UAS_UL_ShotManager_Items(bpy.types.UIList):
             mainRow.separator(factor=0.8)
             row = mainRow.row(align=True)
             grid_flow = row.grid_flow(align=True, columns=2, even_columns=False)
-            grid_flow.alert = item.kitsu_altert_duration != item.getDuration()
+            if item.kitsu_altert_duration != -1:
+                grid_flow.alert = item.kitsu_altert_duration != item.getDuration()
             grid_flow.use_property_split = False
             # grid_flow.scale_x = button_x_factor - 0.1
             if props.display_duration_in_shotlist:
@@ -279,6 +281,20 @@ class UAS_UL_ShotManager_Items(bpy.types.UIList):
                 grid_flow.operator("uas_shot_manager.nolens", text="-").index = index
                 grid_flow.alert = False
             grid_flow.scale_x = 1.0
+
+    
+        ############
+        #  kitsu
+        ########
+        row = mainRow.row(align=True)
+        grid_flow = row.grid_flow(align=True, columns=3, even_columns=False)
+        grid_flow.use_property_split = False
+        grid_flow.scale_x = 0.5
+        if item.kitsu_altert_duration != -1:
+            grid_flow.prop(item, "kitsu_altert_duration", text="")
+            grid_flow.enabled  = False
+        else:
+            grid_flow.label(text="-")
 
 
 #################

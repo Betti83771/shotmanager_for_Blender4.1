@@ -89,6 +89,26 @@ class UAS_ShotManager_ShotsGlobalSettings(PropertyGroup):
         default="FULL",
     )
 
+    def _update_toggle_small_full(self, context):
+        props = config.getAddonProps(context.scene)
+        take = props.getCurrentTake()
+        shotList = take.getShotsList(ignoreDisabled=False)
+
+        for shot in shotList:
+            cam = shot.camera
+            if self.toggle_small_full:
+                cam.data.background_images[0].scale = 1
+                cam.data.background_images[0].offset[0] = 0
+                cam.data.background_images[0].offset[1] = 0
+            else:
+                cam.data.background_images[0].scale = 0.25
+                cam.data.background_images[0].offset[0] = 0.375
+                cam.data.background_images[0].offset[1] = 0.375
+
+            
+
+    toggle_small_full: BoolProperty(description="True full, false small", default=True, update=_update_toggle_small_full)
+
     #########################
     # Storyboard
     #########################

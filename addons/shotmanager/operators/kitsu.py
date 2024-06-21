@@ -57,7 +57,7 @@ def gen_shots_from_kitsu(props, kitsu_props, shot_info, last_idx):
       for sh in shots:
          if sh.name not in (si[0] for si in shot_info.values()):
             sh.enabled = False
-      cursor = max(shots, key=lambda sh: sh.getDuration()) 
+      cursor = max(s.end for s in shots)+1
    else:
       cursor=0
 
@@ -69,7 +69,6 @@ def gen_shots_from_kitsu(props, kitsu_props, shot_info, last_idx):
       shot_duration = shot_info[i][1]
 
       existing_shot = shot_manager.get_shot_by_name(props, shot_name)
-     
 
       if existing_shot:
          # Flag differences in length
@@ -79,8 +78,12 @@ def gen_shots_from_kitsu(props, kitsu_props, shot_info, last_idx):
          if shot_info[i][2]:
             existing_shot.removeBGImages()
             existing_shot.addBGImages(
-                  shot_info[i][2], frame_start=0, alpha=props.shotsGlobalSettings.backgroundAlpha, addSoundFromVideo=True
+                  shot_info[i][2], frame_start=existing_shot.start, alpha=props.shotsGlobalSettings.backgroundAlpha, addSoundFromVideo=True
             )
+         
+         existing_shot.bgImages_linkToShotStart = True
+         #reorder following the index
+         props.moveShotToIndex(existing_shot, i)
       
       else:
          # add at the end of the blender timeline,  shotmanager list matched index 
@@ -118,8 +121,10 @@ def gen_shots_from_kitsu(props, kitsu_props, shot_info, last_idx):
          # add bkg animatic
          if shot_info[i][2]:
             new_shot.addBGImages(
-                  shot_info[i][2], frame_start=0, alpha=props.shotsGlobalSettings.backgroundAlpha, addSoundFromVideo=True
+                  shot_info[i][2], frame_start=cursor, alpha=props.shotsGlobalSettings.backgroundAlpha, addSoundFromVideo=True
             )
+         
+         new_shot.bgImages_linkToShotStart = True
          cursor = cursor + shot_duration
     
 def download_preview(kshot):
@@ -215,13 +220,20 @@ class UAS_GenShotsFromKitsu(Operator):
 
    def execute(self, context):
       props = config.getAddonProps(context.scene)
-      session = prefs.session_get(context)
-      session.end() 
-      gazu.cache.clear_all()
-      session.start()
-      cache.init_cache_variables()
       kitsu_props = context.scene.kitsu
-      kseq = gazu.shot.get_sequence_by_name(cache.project_active_get().id, kitsu_props.sequence_active_name)
+      if kitsu_props.sequence_active_name == "":
+         self.report('ERROR', "Kitsu update shots error: Active sequence name missing. ")
+         return {'CANCELLED'}
+      session = prefs.session_get(context)
+      current_proj_name = cache.project_active_get().name
+      session.end()
+      gazu.cache.clear_all()
+      cache.clear_cache_variables()
+      session.start()
+      proj = gazu.project.get_project_by_name(current_proj_name)
+      cache.project_active_set_by_id(context, proj["id"])
+      cache.init_cache_variables()
+      kseq = gazu.shot.get_sequence_by_name(proj, kitsu_props.sequence_active_name)
       shot_info, last_idx  = retrieve_shot_info_from_kitsu(gazu.scene.get_scene_by_name(kseq, kitsu_props.scene_active_name))
       gen_shots_from_kitsu(props, kitsu_props, shot_info, last_idx)
 
@@ -256,6 +268,8 @@ class UAS_BuildSceneFileFromKitsu(Operator):
 
    def build_scene_file_from_kitsu(self, context, props, kitsu_props, shot_info, last_idx):
       """See Blender Kitsu scene builder"""
+      
+
       scene = context.scene
       scene.name = self.chosen_scene
       project_root_dir = prefs.project_root_dir_get(context)
@@ -293,34 +307,7 @@ class UAS_BuildSceneFileFromKitsu(Operator):
                 collection_name=collection, file_path=str(filepath), scene=scene
             )
             core.add_action_to_armature(linked_collection, shot)
-            print(f"'{collection}': Succesfully Linked & Overriden")
-
-         
-      
-      # TODO save file in correct location
-      savefile_path = path.join(project_root_dir, self.chosen_seq, "")
-      Path(savefile_path).mkdir(parents=True, exist_ok=True)
-      filepath =path.join(savefile_path, "SH" +self.chosen_scene )
-      if Path(filepath+".blend").exists():
-         count=1
-         filepath = filepath + "_V000"
-         biggest_ver_found = filepath
-         n_of_files = len(listdir(savefile_path))
-         for i in range(1, n_of_files+1):
-            filepath = filepath[:-3] + str(int(filepath[-3:]) + 1).zfill(3)
-            if  Path(filepath+".blend").exists():
-               biggest_ver_found = filepath
-         
-         filepath = biggest_ver_found[:-3] + str(int(biggest_ver_found[-3:]) + 1).zfill(3)
-      filepath = filepath+".blend"
-
-      # set file path
-      props.kitsu_current_file_path = bpy.data.filepath.replace(str(project_root_dir), path.sep)
-      kitsu_props.scene_active_name = self.chosen_scene
-      kitsu_props.sequence_active_name = self.chosen_seq
-      bpy.ops.wm.save_as_mainfile(filepath=filepath, check_existing=True)
-
-      
+            print(f"'{collection}': Succesfully Linked & Overriden") 
       return
 
 
@@ -355,16 +342,47 @@ class UAS_BuildSceneFileFromKitsu(Operator):
       else:
          col.label(text="No Kitsu data found on this sequence.", icon='ERROR')
 
- 
+  
 
    def execute(self, context):
       props = config.getAddonProps(context.scene)
+      project_root_dir = prefs.project_root_dir_get(context)
       kitsu_props = context.scene.kitsu
       kseq = gazu.shot.get_sequence_by_name(cache.project_active_get().id, self.chosen_seq)
+
+      
+
+      # delete all existing  objects
+      for obj in reversed(bpy.data.objects):
+         bpy.data.objects.remove(obj)
+      bpy.data.orphans_purge()
       shot_info, last_idx  = retrieve_shot_info_from_kitsu(gazu.scene.get_scene_by_name(kseq, self.chosen_scene))
       self.build_scene_file_from_kitsu(context, props, kitsu_props, shot_info, last_idx)
       gen_shots_from_kitsu(props, kitsu_props, shot_info, last_idx)
+      
+      
+      # TODO save file in correct location
+      savefile_path = path.join(project_root_dir, self.chosen_seq, "")
+      Path(savefile_path).mkdir(parents=True, exist_ok=True)
+      filepath =path.join(savefile_path, "SH" +self.chosen_scene )
+      if Path(filepath+".blend").exists():
+         count=1
+         filepath = filepath + "_V000"
+         biggest_ver_found = filepath
+         n_of_files = len(listdir(savefile_path))
+         for i in range(1, n_of_files+1):
+            filepath = filepath[:-3] + str(int(filepath[-3:]) + 1).zfill(3)
+            if  Path(filepath+".blend").exists():
+               biggest_ver_found = filepath
+         
+         filepath = biggest_ver_found[:-3] + str(int(biggest_ver_found[-3:]) + 1).zfill(3)
+      filepath = filepath+".blend"
 
+      # set file path
+      props.kitsu_current_file_path = bpy.data.filepath.replace(str(project_root_dir), path.sep)
+      kitsu_props.scene_active_name = self.chosen_scene
+      kitsu_props.sequence_active_name = self.chosen_seq
+      bpy.ops.wm.save_as_mainfile(filepath=filepath, check_existing=True)
       return {"FINISHED"}
    
 class UAS_OpenKitsuSceneFile(Operator):

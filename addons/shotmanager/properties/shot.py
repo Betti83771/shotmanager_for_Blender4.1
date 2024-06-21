@@ -904,4 +904,4 @@ class UAS_ShotManager_Shot(ShotInterface, PropertyGroup):
     # kitsu
     ##########
     kitsu_altert_start: IntProperty()
-    kitsu_altert_duration: IntProperty()
+    kitsu_altert_duration: IntProperty(default=-1)

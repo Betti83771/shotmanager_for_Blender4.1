@@ -315,6 +315,17 @@ def draw_shot_properties(layout, context, shot):
         camRow.prop(shot.camera.data, "display_size", text="Frustum Size")
     camRow.separator(factor=2.8)
 
+
+    #############
+    # Animatic bkg
+
+    sepRow = mainCol.row()
+    sepRow.scale_y = 0.8
+    sepRow.separator()
+    animaticRow = mainCol.row()
+    mainCol.prop(props.shotsGlobalSettings, "backgroundAlpha", text="Alpha", slider=True)
+    mainCol.prop(props.shotsGlobalSettings, "toggle_small_full", text="Full Screen", toggle=True)
+
     ####################
     # Output
 
