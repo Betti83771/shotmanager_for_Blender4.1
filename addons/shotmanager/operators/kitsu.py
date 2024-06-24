@@ -27,8 +27,14 @@ class KitsuSequence(bpy.types.PropertyGroup):
 def get_kitsu_scenes(ksequence):
    """From the retrived shot data, sets up and rertrieves scenes"""
    kshots = gazu.shot.all_shots_for_sequence(ksequence)
+   # remove all shots from scenes
+   for kscene in reversed(gazu.scene.all_scenes_for_sequence(ksequence)):
+      gazu.client.delete(f"data/scenes/{kscene['id']}")
+      #for sh in gazu.scene.all_shots_for_scene(kscene):
+         #gazu.scene.remove_shot_from_scene(kscene, sh)
    kscenes = {}
    for kshot in kshots:
+      print(kshot)
       if not kshot["data"]: continue
       if "scene" not in kshot["data"].keys(): continue
       scene_name = kshot["data"]["scene"]
@@ -54,9 +60,14 @@ def gen_shots_from_kitsu(props, kitsu_props, shot_info, last_idx):
 
    if len(shots )> 1:
       # disable removed shots
+      
+      for si in shot_info.values():
+         print(si[0] )
       for sh in shots:
          if sh.name not in (si[0] for si in shot_info.values()):
             sh.enabled = False
+         
+         print(sh.name, sh.enabled)
       cursor = max(s.end for s in shots)+1
    else:
       cursor=0
@@ -71,6 +82,7 @@ def gen_shots_from_kitsu(props, kitsu_props, shot_info, last_idx):
       existing_shot = shot_manager.get_shot_by_name(props, shot_name)
 
       if existing_shot:
+         existing_shot.enabled = True
          # Flag differences in length
          existing_shot.kitsu_altert_duration = shot_duration
 
@@ -162,6 +174,7 @@ def retrieve_shot_info_from_kitsu(kscene):
    outside_idx = []
    biggest_idx = 0
    for kshot in gazu.scene.all_shots_for_scene(kscene):
+      print("KSHOT \n", kshot)
       preview_path = download_preview(kshot)
       if kshot["data"]:
          if ("index" in kshot["data"].keys()) and (kshot["data"]["index"] is not None) and kshot["nb_frames"]:
@@ -234,6 +247,7 @@ class UAS_GenShotsFromKitsu(Operator):
       cache.project_active_set_by_id(context, proj["id"])
       cache.init_cache_variables()
       kseq = gazu.shot.get_sequence_by_name(proj, kitsu_props.sequence_active_name)
+      get_kitsu_scenes(kseq)
       shot_info, last_idx  = retrieve_shot_info_from_kitsu(gazu.scene.get_scene_by_name(kseq, kitsu_props.scene_active_name))
       gen_shots_from_kitsu(props, kitsu_props, shot_info, last_idx)
 
