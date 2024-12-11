@@ -59,6 +59,8 @@ def convertVersionStrToInt(versionStr):
             break
     versionStr = versionStr[firstDigitInd:]
     versionSplitted = versionStr.split(".")
+    if len(versionSplitted) < 3:
+        versionSplitted.extend(["0", "0"])
     return int(formatedVersion.format(int(versionSplitted[0]), int(versionSplitted[1]), int(versionSplitted[2])))
 
 
