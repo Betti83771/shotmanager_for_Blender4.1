@@ -109,7 +109,7 @@ def gen_shots_from_kitsu(props, kitsu_props, shot_info, last_idx):
       
 
          # create camera to assign to shot
-         cam = bpy.data.cameras.new("Camera01")
+         cam = bpy.data.cameras.new("Cam_"+shot_name) 
          cam_shot_1 = bpy.data.objects.new(cam.name, cam)
          camera_coll.objects.link(cam_shot_1)
          cam_shot_1.location = (0.0, 0.0, 1.0)
@@ -149,7 +149,7 @@ def download_preview(kshot):
    preview =  kshot["preview_file_id"] 
    if not preview: return
    preview_file= gazu.files.get_preview_file(preview)
-   preview_path = path.join(preview_base_path, preview_file["original_name"]+"."+preview_file["extension"])
+   preview_path = path.join(preview_base_path, preview_file["original_name"]+"_"+kshot["name"]+"."+preview_file["extension"])
    Path(preview_base_path).mkdir(parents=True, exist_ok=True)
    gazu.files.download_preview_file(preview, preview_path)
    return preview_path
@@ -213,10 +213,10 @@ def retrieve_scene_info_from_kitsu(sequences):
    for ksequence in ksequences:
       seq1 = sequences.add()
       seq1.name=ksequence["name"]
-      for i, kscene in enumerate(get_kitsu_scenes(ksequence).values()):
+      for i, kscene in enumerate(gazu.scene.all_scenes_for_sequence(ksequence)):
          scene = seq1.scenes_coll.add()
          scene.name = kscene["name"]
-         scene_num = int(scene.name)
+         scene_num = int(''.join(filter(str.isdigit, scene.name)))
          seq1.scenes[i] = scene_num
    return True
 
@@ -247,7 +247,7 @@ class UAS_GenShotsFromKitsu(Operator):
       cache.project_active_set_by_id(context, proj["id"])
       cache.init_cache_variables()
       kseq = gazu.shot.get_sequence_by_name(proj, kitsu_props.sequence_active_name)
-      get_kitsu_scenes(kseq)
+      scenes = gazu.scene.all_scenes_for_sequence(kseq)
       shot_info, last_idx  = retrieve_shot_info_from_kitsu(gazu.scene.get_scene_by_name(kseq, kitsu_props.scene_active_name))
       gen_shots_from_kitsu(props, kitsu_props, shot_info, last_idx)
 
@@ -307,7 +307,6 @@ class UAS_BuildSceneFileFromKitsu(Operator):
             continue
          collection = asset["data"]["collection"]
          
-         print(collection)
          asset_type = gazu.asset.get_asset_type(asset["entity_type_id"])["name"]
          if asset_type == '3D Set Asset':
             linked_collection = core.link_data_block(
@@ -378,7 +377,7 @@ class UAS_BuildSceneFileFromKitsu(Operator):
       # TODO save file in correct location
       savefile_path = path.join(project_root_dir, self.chosen_seq, "")
       Path(savefile_path).mkdir(parents=True, exist_ok=True)
-      filepath =path.join(savefile_path, "SH" +self.chosen_scene )
+      filepath =path.join(savefile_path, self.chosen_scene )
       if Path(filepath+".blend").exists():
          count=1
          filepath = filepath + "_V000"
