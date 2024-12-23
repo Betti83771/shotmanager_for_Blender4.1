@@ -31,7 +31,7 @@ Shotmanager: Ubisoft - Julien Blervaque (aka Werwack), Romain Carriquiry Borchia
 Blender Kitsu: Blender Foundation - Paul Golter""",
     "description": "Customized pipeline tool for previz at Eddy Studio",
     "blender": (4, 0, 0),
-    "version": (1, 0, 0),
+    "version": (1, 1, 0),
     "location": "View3D > Shot Mng",
     "doc_url": "",
     "tracker_url": "",
