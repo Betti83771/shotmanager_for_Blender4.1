@@ -1159,7 +1159,8 @@ def retimeScene(
                             if mat.animation_data is not None and mat.animation_data.action is not None:
                                 _retimeFcurve(mat.animation_data.action)
                             if (
-                                mat.node_tree.animation_data is not None
+                                mat.node_tree is not None
+                                and mat.node_tree.animation_data is not None
                                 and mat.node_tree.animation_data.action is not None
                             ):
                                 _retimeFcurve(mat.node_tree.animation_data.action)
