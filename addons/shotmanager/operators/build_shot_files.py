@@ -7,7 +7,7 @@ def build_single_shot_file(context, shot_name, save_path):
     props = config.getAddonProps(context.scene)
     current_take = props.getCurrentTake()
     shot = props.getShotByName(shot_name)
- #   print(shot_name, shot)
+    print(shot, shot_name)
     start = shot.start
     end = shot.end
     for scene in bpy.data.scenes:
@@ -16,12 +16,18 @@ def build_single_shot_file(context, shot_name, save_path):
     context.scene.frame_start = start
     context.scene.frame_end = end
 
-    for sh in current_take.shots:
-        if sh != shot:
+    take_index = props.getTakeIndex(current_take)
+    shots = [shot.name for shot in current_take.getShotsList(ignoreDisabled=False)]
+    print("shots", shots)
+    for sh_name in shots:
+        if sh_name != shot_name:
+            sh = props.getShotByName(sh_name)
+            print("removing", sh.name)
             sh_index = props.getShotIndex(sh)
-            take_index = props.getTakeIndex(current_take)
             props.removeShotByIndex(sh_index, deleteCamera=True, takeIndex=take_index) 
-
+    
+    props.setSelectedShot(shot)
+    props.setCurrentShot(shot)
     if bpy.ops.wm.save_as_mainfile.poll():
         bpy.ops.wm.save_as_mainfile(filepath=save_path)
         return True
