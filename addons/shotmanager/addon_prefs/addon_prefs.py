@@ -118,7 +118,7 @@ class UAS_ShotManager_AddonPrefs(AddonPreferences):
             "is available online, and if so then a red world icon is displayed at the\n"
             "top right corner of the main panel"
         ),
-        default=True,
+        default=False,
     )
 
     # not used anymore since Stamp Info has been integrated
@@ -148,7 +148,8 @@ class UAS_ShotManager_AddonPrefs(AddonPreferences):
         self.stb_frameTemplate.initialize(mode="ADDON_PREFS")
         self.newAvailableVersion = 0
 
-        if self.checkForNewAvailableVersion and not config.devDebug:
+       # if self.checkForNewAvailableVersion and not config.devDebug:
+        if False: # Not used because we host it on prod server
             versionStr = None
             _logger.debug_ext("Checking for updates online...", col="BLUE")
             versionStr = get_latest_release_version(
@@ -203,7 +204,7 @@ class UAS_ShotManager_AddonPrefs(AddonPreferences):
 
         # self.display_25D_greasepencil_panel = True
 
-        self.previousInstalledVersion = self.version()[1]
+      #  self.previousInstalledVersion = self.version()[1]
         self.isInitialized = True
 
     ########################################################################

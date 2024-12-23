@@ -70,7 +70,7 @@ class UAS_PT_ShotManager(Panel):
         #     return False
         return True
 
-    def draw_header(self, context):
+    def draw_header__(self, context):
         import addon_utils
 
         props = config.getAddonProps(context.scene)
@@ -101,7 +101,7 @@ class UAS_PT_ShotManager(Panel):
             else:
                 betaRow.label(text=f" ** {addonWarning} **")
 
-    def draw_header_preset(self, context):
+    def draw_header_preset___(self, context):
         prefs = config.getAddonPrefs()
         layout = self.layout
         layout.emboss = "NONE"
@@ -843,16 +843,16 @@ class UAS_PT_ShotManager(Panel):
             # time tools ############
             ###########################
 
-            timerow = shotsrow.row(align=True)
-            timerow.alignment = "RIGHT"
-            timerow.scale_x = enlargeButs
-            timerow.operator("uas_shot_manager.scenerangefromshot", text="", icon="PREVIEW_RANGE")
+         #   timerow = shotsrow.row(align=True)
+         #   timerow.alignment = "RIGHT"
+         #   timerow.scale_x = enlargeButs
+          #  timerow.operator("uas_shot_manager.scenerangefromshot", text="", icon="PREVIEW_RANGE")
 
             # col = row.column(align=True)
             # shotsrow.separator(factor=3.2)
             # row.operator("uas_shot_manager.shots_prefs", text="", icon="SETTINGS")
             # shotsrow.operator("shot_manager.features", text="", icon="PROPERTIES")
-            shotsrow.menu("UAS_MT_Shot_Manager_shots_toolsmenu", icon="TOOL_SETTINGS", text="")
+           # shotsrow.menu("UAS_MT_Shot_Manager_shots_toolsmenu", icon="TOOL_SETTINGS", text="")
 
             ##################################################
             ##################################################
@@ -887,6 +887,17 @@ class UAS_PT_ShotManager(Panel):
             if 0 < numShots:
                 if shot is not None:
                     sm_shot_settings_panel_ui.drawShotPropertiesToolbar(layout, context, shot)
+
+        # construct shot files
+        ################
+        if 0 < numShots:
+            layout.separator()
+            row = layout.row()
+            row.label(text="Construct Shot Files:")
+            row = layout.row()
+            row.prop(props, "build_shots_save_dir", text="Shots root")  
+            row = layout.row()
+            row.operator("uas_shot_manager.build_shot_files", icon="FILE_REFRESH", text="Build Shot Files")
 
         # layout.separator ( factor = 1 )
 

@@ -5284,6 +5284,11 @@ class UAS_ShotManager_Props(MontageInterface, PropertyGroup):
     
     kitsu_current_scene: StringProperty()
     kitsu_current_seq: StringProperty()
+
+
+    ######################
+    #  Shot Builder
+    build_shots_save_dir: bpy.props.StringProperty(name="Save Directory", default="\\", subtype="DIR_PATH")
    
 
 

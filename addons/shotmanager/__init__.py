@@ -49,6 +49,8 @@ def register():
     register_addon.register()
 
 
+
 def unregister():
     register_addon.unregister()
     config.releaseGlobalVariables()
+  

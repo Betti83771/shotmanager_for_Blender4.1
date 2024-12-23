@@ -51,7 +51,11 @@ class KITSU_OT_session_start(bpy.types.Operator):
 
     def execute(self, context: bpy.types.Context) -> Set[str]:
         self.thread_login(context)
-        if not prefs.session_get(context).is_auth():
+        session = prefs.session_get(context)
+        if not session.is_host_up():
+                self.report({"ERROR"}, "Server is not reachable")
+                return  {"CANCELLED"}
+        if not session.is_auth():
             self.report({"ERROR"}, "Login data not correct")
             return {"CANCELLED"}
 
@@ -76,11 +80,12 @@ class KITSU_OT_session_start(bpy.types.Operator):
         session = prefs.session_get(context)
         session.set_config(self.get_config(context))
         try:
+            
             session_data = session.start()
             self.report({"INFO"}, f"Logged in as {session_data.user['full_name']}")
             
         finally:
-            return
+            return 
 
     def thread_login(self, context):
         global active_thread
@@ -123,9 +128,15 @@ class KITSU_OT_session_end(bpy.types.Operator):
 
 def auto_login_on_file_open():
     context = bpy.context
+    ap = prefs.addon_prefs_get(context)
+    if ap.host =="" or ap.email == "" or ap.passwd == "":
+        return
     session = prefs.session_get(context)
     if not session.is_auth():
-        bpy.ops.sm_kitsu.session_start()
+        try:
+            bpy.ops.sm_kitsu.session_start()
+        except Exception as e:
+            print("Auto login failed:", e)
 
 
 # ---------REGISTER ----------.
@@ -142,8 +153,6 @@ def register():
     # Note: Since this timer function does not repeat
     # (because it doesn't return a value)
     # it automatically un-registers after it runs.
-    # FIXME: XXX This makes Blender hang if there is no Internet connectivity
-    # TODO: Rewrite this, so the 'auto' login happens out of the main thread
     bpy.app.timers.register(auto_login_on_file_open, first_interval=0.2)
 
 

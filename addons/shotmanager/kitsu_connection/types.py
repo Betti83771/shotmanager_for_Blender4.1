@@ -61,7 +61,7 @@ class Session:
         # Enable cache.
         gazu.cache.enable()
 
-        if not self._is_host_up():
+        if not self.is_host_up():
             raise gazu.exception.HostException
 
         # Login.
@@ -79,7 +79,7 @@ class Session:
         print("Session ended")
         return True
 
-    def _is_host_up(self) -> bool:
+    def is_host_up(self) -> bool:
         if gazu.client.host_is_up():
             print("Host is up and running at: %s", self.host)
             return True

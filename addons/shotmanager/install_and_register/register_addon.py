@@ -41,6 +41,7 @@ from ..features import storyboard
 
 from ..operators import takes
 from ..operators import kitsu
+from ..operators import build_shot_files
 from ..operators import shots
 from ..operators import shots_global_settings_operators
 
@@ -82,29 +83,7 @@ _logger = sm_logging.getLogger(__name__)
 
 import logging
 
-
-def register():
-
-    #    config.initGlobalVariables()
-
-    from ..utils import utils_ui
-
-    utils_ui.register()
-
-    sm_logging.initialize(addonName="Ubisoft Shot Manager", prefix="SM")
-    if config.devDebug:
-        _logger.setLevel("DEBUG")  # CRITICAL ERROR WARNING INFO DEBUG NOTSET
-
-    _logger.tags = config.getLoggingTags()
-    logger_level = f"Logger level: {sm_logging.getLevelName()}"
-    sm_logging.loggerFormatTest(message="Logger test message")
-
-    versionTupple = utils.display_addon_registered_version("Eddy Shot Manager", more_info=logger_level)
-
-    from ..overlay_tools.workspace_info import workspace_info
-
-    workspace_info.register()
-
+def install_dependencies():
     # install dependencies and required Python libraries
     ###################
     # try to install dependencies and collect the errors in case of troubles
@@ -153,6 +132,31 @@ def register():
         pil_logger.setLevel(logging.INFO)
     except Exception:
         pass
+
+
+def register():
+
+    #    config.initGlobalVariables()
+
+    from ..utils import utils_ui
+
+    utils_ui.register()
+
+    sm_logging.initialize(addonName="Ubisoft Shot Manager", prefix="SM")
+    if config.devDebug:
+        _logger.setLevel("DEBUG")  # CRITICAL ERROR WARNING INFO DEBUG NOTSET
+
+    _logger.tags = config.getLoggingTags()
+    logger_level = f"Logger level: {sm_logging.getLevelName()}"
+    sm_logging.loggerFormatTest(message="Logger test message")
+
+    versionTupple = utils.display_addon_registered_version("Eddy Shot Manager", more_info=logger_level)
+
+    from ..overlay_tools.workspace_info import workspace_info
+
+    workspace_info.register()
+
+    
 
     # register other packages
     ###################
@@ -207,6 +211,7 @@ def register():
     takes.register()
     shots.register()
     kitsu.register()
+    build_shot_files.register()
     shots_global_settings.register()
     shots_global_settings_operators.register()
     precut_tools.register()
@@ -429,6 +434,7 @@ def unregister():
     shots_global_settings.unregister()
     shots.unregister()
     takes.unregister()
+    build_shot_files.unregister()
     kitsu.unregister()
 
     utils_operators_overlays.unregister()

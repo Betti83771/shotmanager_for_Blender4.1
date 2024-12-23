@@ -52,49 +52,44 @@ def drawShotPropertiesToolbar(layout, context, shot):
     cameraIsValid = shot.isCameraValid()
     propsCurrentLayout = props.getCurrentLayout()
 
-    # if propsCurrentLayout.display_notes_in_properties or propsCurrentLayout.display_cameraBG_in_properties or propsCurrentLayout.display_storyboard_in_properties:
-    if True:
-        # leftrow = row.row(align=False)
-        # leftrow.alignment = "LEFT"
+    # leftrow = row.row(align=False)
+    # leftrow.alignment = "LEFT"
 
-        # propertiesModeStr = "Current Shot:  "
-        # if "SELECTED" == scene.UAS_shot_manager_props.current_shot_properties_mode:
-        #     propertiesModeStr = "Selected Shot:  "
-        # leftrow.label(text=propertiesModeStr)
+    # propertiesModeStr = "Current Shot:  "
+    # if "SELECTED" == scene.UAS_shot_manager_props.current_shot_properties_mode:
+    #     propertiesModeStr = "Selected Shot:  "
+    # leftrow.label(text=propertiesModeStr)
 
-        buttonsrow = row.row(align=True)
-        buttonsrow.alignment = "LEFT"
-        buttonsrow.separator()
+    buttonsrow = row.row(align=True)
+    buttonsrow.alignment = "LEFT"
+    buttonsrow.separator()
 
+    subrow = buttonsrow.row()
+    subrow.alert = not cameraIsValid
+    subrow.scale_x = 0.9
+    panelIcon = "TRIA_DOWN" if props.expand_shot_properties else "TRIA_RIGHT"
+    subrow.prop(props, "expand_shot_properties", toggle=True, icon=panelIcon)
+
+    if propsCurrentLayout.display_cameraBG_in_properties:
         subrow = buttonsrow.row()
-        subrow.alert = not cameraIsValid
         subrow.scale_x = 0.9
-        panelIcon = "TRIA_DOWN" if props.expand_shot_properties else "TRIA_RIGHT"
-        subrow.prop(props, "expand_shot_properties", toggle=True, icon=panelIcon)
-
-        if propsCurrentLayout.display_cameraBG_in_properties:
-            subrow = buttonsrow.row()
-            subrow.scale_x = 0.9
-            panelIcon = "TRIA_DOWN" if props.expand_cameraBG_properties else "TRIA_RIGHT"
-            subrow.prop(props, "expand_cameraBG_properties", toggle=True, icon=panelIcon)
-        if propsCurrentLayout.display_storyboard_in_properties:
-            subrow = buttonsrow.row()
-            subrow.scale_x = 0.9
-            panelIcon = "TRIA_DOWN" if props.expand_storyboard_properties else "TRIA_RIGHT"
-            subrow.prop(props, "expand_storyboard_properties", text="Storyboard", toggle=True, icon=panelIcon)
-        if propsCurrentLayout.display_notes_in_properties:
-            subrow = buttonsrow.row()
-            subrow.scale_x = 0.9
-            panelIcon = "TRIA_DOWN" if props.expand_notes_properties else "TRIA_RIGHT"
-            subrow.prop(props, "expand_notes_properties", toggle=True, icon=panelIcon)
+        panelIcon = "TRIA_DOWN" if props.expand_cameraBG_properties else "TRIA_RIGHT"
+        subrow.prop(props, "expand_cameraBG_properties", toggle=True, icon=panelIcon)
+    if propsCurrentLayout.display_storyboard_in_properties:
+        subrow = buttonsrow.row()
+        subrow.scale_x = 0.9
+        panelIcon = "TRIA_DOWN" if props.expand_storyboard_properties else "TRIA_RIGHT"
+        subrow.prop(props, "expand_storyboard_properties", text="Storyboard", toggle=True, icon=panelIcon)
+    if propsCurrentLayout.display_notes_in_properties:
+        subrow = buttonsrow.row()
+        subrow.scale_x = 0.9
+        panelIcon = "TRIA_DOWN" if props.expand_notes_properties else "TRIA_RIGHT"
+        subrow.prop(props, "expand_notes_properties", toggle=True, icon=panelIcon)
 
         buttonsrow.separator()
-    else:
-        propertiesModeStr = (
-            "Selected Shot Notes:" if "SELECTED" == props.current_shot_properties_mode else "Current Shot Notes:"
-        )
-        row.label(text=propertiesModeStr)
 
+
+ 
 
 class UAS_PT_ShotManager_ShotProperties(Panel):
     bl_label = " "  # "Current Shot Properties" # keep the space !! # Note: text is drawn in gray, not white

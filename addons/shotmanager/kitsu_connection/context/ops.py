@@ -445,7 +445,7 @@ class KITSU_OT_con_set_asset_th(bpy.types.Operator):
         )
         task.add_preview_to_comment(
             comment,
-            "R:\\#EQUIPE\\b.abbattista\\Eddy\\Test_Blender_prod\\svn\\pro\\assets\\thumbnails\\char_1.png",
+           self.preview,
             0,
         )
         self.report(

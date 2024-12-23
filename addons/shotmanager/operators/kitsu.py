@@ -207,7 +207,8 @@ def retrieve_scene_info_from_kitsu(sequences):
 
    project = cache.project_active_get()
    if not project: 
-      bpy.ops.kitsu.con_productions_load('INVOKE_DEFAULT')
+      if bpy.ops.kitsu.con_productions_load.poll():
+         bpy.ops.kitsu.con_productions_load('INVOKE_DEFAULT')
       return False
    ksequences = gazu.shot.all_sequences_for_project(project.id)
    for ksequence in ksequences:

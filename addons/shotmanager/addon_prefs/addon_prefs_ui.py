@@ -37,42 +37,15 @@ def draw_addon_prefs(self, context):
     layout = layout.column(align=False)
     padding_left = 4
 
-    if config.devDebug:
-        layout.label(
-            text=f"Previously Installed Version: {self.previousInstalledVersion} - Current version: {self.version()[1]}"
-        )
-
-    if self.previousInstalledVersion > self.version()[1]:
-        warningRow = layout.row()
-        warningRow.alert = True
-        restartRow.alignment = "CENTER"
-        warningRow.label(
-            text="***  Warning: The add-on version that has been installed is older than the one that was in place  ***"
-        )
-
-        restartRow = layout.row()
-        restartRow.alert = True
-        restartRow.alignment = "CENTER"
-        restartRow.label(text="***  Please re-start Blender to finish the update of the add-on Preferences ***")
-
-    elif 0 != self.previousInstalledVersion and self.previousInstalledVersion < self.version()[1]:
-        restartRow = layout.row()
-        restartRow.alignment = "CENTER"
-        restartRow.label(
-            text=f"--  Version {self.version()[0]} has just been installed over version {convertVersionIntToStr(self.previousInstalledVersion)}  --"
-        )
-        restartRow = layout.row()
-        restartRow.alert = True
-        restartRow.alignment = "CENTER"
-        restartRow.label(text="***  Please re-start Blender to finish the update of the add-on Preferences ***")
-
+   
     # Dependencies
     ###############
-    drawDependencies(context, layout)
+  #  drawDependencies(context, layout)
 
     # General and updates
     ###############
-    drawGeneral(context, self, layout)
+   # drawGeneral(context, self, layout)
+   # commented out because we dont want to enable the check for updates feature
 
     # Settings
     ###############
@@ -119,7 +92,7 @@ def draw_addon_prefs(self, context):
 
     # Dev and debug
     ###############
-    drawDevAndDebug(context, self, layout)
+  #  drawDevAndDebug(context, self, layout)
 
 
 ##################################################################
