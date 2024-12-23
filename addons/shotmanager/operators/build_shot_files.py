@@ -8,7 +8,6 @@ def build_single_shot_file(context, shot_name, save_path):
     props = config.getAddonProps(context.scene)
     current_take = props.getCurrentTake()
     shot = props.getShotByName(shot_name)
-    print(shot, shot_name)
     start = shot.start
     end = shot.end
     duration = end - start + 1
@@ -18,11 +17,9 @@ def build_single_shot_file(context, shot_name, save_path):
 
     take_index = props.getTakeIndex(current_take)
     shots = [shot.name for shot in current_take.getShotsList(ignoreDisabled=False)]
-    print("shots", shots)
     for sh_name in shots:
         if sh_name != shot_name:
             sh = props.getShotByName(sh_name)
-            print("removing", sh.name)
             sh_index = props.getShotIndex(sh)
             props.removeShotByIndex(sh_index, deleteCamera=True, takeIndex=take_index) 
     
@@ -32,7 +29,6 @@ def build_single_shot_file(context, shot_name, save_path):
     new_start = 1001
     new_end = new_start + duration - 1
     offset = new_start - start
-    print("offset", offset)
     retimerApplyToSettings=props.retimer.getCurrentApplyToSettings()
     retimerApplyToSettings.initialize('SCENE')
     retimerApplyToSettings.applyToStoryboardShotRanges = True
@@ -75,7 +71,7 @@ def build_shot_files(context, ignoreDisabled=True):
         if  build_single_shot_file(context, shot_name, save_path):
             saved_shots.append(shot_name)
         bpy.ops.wm.open_mainfile(filepath=current_file_path)
-        config.getAddonProps(context.scene).initialize_shot_manager()
+       # config.getAddonProps(context.scene).initialize_shot_manager()
     return saved_shots
 
 class UAS_OT_BuildShotFiles(Operator):
