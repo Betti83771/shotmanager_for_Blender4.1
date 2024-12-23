@@ -48,7 +48,7 @@ class UAS_PT_ShotManagerRenderPanelStdalone(Panel):
 
         return displayPanel and prefs.display_render_panel
 
-    def draw_header(self, context):
+    def draw_header__(self, context):
 
         props = config.getAddonProps(context.scene)
         layout = self.layout
@@ -74,7 +74,7 @@ class UAS_PT_ShotManagerRenderPanelStdalone(Panel):
             else:
                 betaRow.label(text=f" *** {addonWarning} ***")
 
-    def draw_header_preset(self, context):
+    def draw_header_preset__(self, context):
         drawHeaderPreset(self, context)
 
     def draw(self, context):
