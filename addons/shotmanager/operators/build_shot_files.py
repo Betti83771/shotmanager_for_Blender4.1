@@ -2,6 +2,7 @@ import bpy
 from bpy.types import Operator
 from shotmanager.config import config   
 from os.path import exists
+from shotmanager.retimer.retimer import retimeScene
 
 def build_single_shot_file(context, shot_name, save_path):
     props = config.getAddonProps(context.scene)
@@ -10,11 +11,10 @@ def build_single_shot_file(context, shot_name, save_path):
     print(shot, shot_name)
     start = shot.start
     end = shot.end
+    duration = end - start + 1
     for scene in bpy.data.scenes:
         if scene != context.scene:
             bpy.data.scenes.remove(scene)
-    context.scene.frame_start = start
-    context.scene.frame_end = end
 
     take_index = props.getTakeIndex(current_take)
     shots = [shot.name for shot in current_take.getShotsList(ignoreDisabled=False)]
@@ -28,6 +28,29 @@ def build_single_shot_file(context, shot_name, save_path):
     
     props.setSelectedShot(shot)
     props.setCurrentShot(shot)
+
+    new_start = 1001
+    new_end = new_start + duration - 1
+    offset = new_start - start
+    print("offset", offset)
+    retimerApplyToSettings=props.retimer.getCurrentApplyToSettings()
+    retimerApplyToSettings.initialize('SCENE')
+    retimerApplyToSettings.applyToStoryboardShotRanges = True
+    context.scene.frame_current = 0
+    retimeScene(context=context,
+                retimeMode="GLOBAL_OFFSET",
+                retimerApplyToSettings=retimerApplyToSettings,
+                objects=context.scene.objects,
+                start_incl=0,
+                duration_incl=offset,
+                join_gap=True,
+    )
+
+    
+    context.scene.frame_start = 1001
+    context.scene.frame_end = new_end
+    context.scene.frame_current = 1001
+
     if bpy.ops.wm.save_as_mainfile.poll():
         bpy.ops.wm.save_as_mainfile(filepath=save_path)
         return True
