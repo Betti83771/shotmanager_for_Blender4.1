@@ -83,56 +83,6 @@ _logger = sm_logging.getLogger(__name__)
 
 import logging
 
-def install_dependencies():
-    # install dependencies and required Python libraries
-    ###################
-    # try to install dependencies and collect the errors in case of troubles
-    # If some mandatory libraries cannot be loaded then an alternative Add-on Preferences panel
-    # is used and provide some visibility to the user to solve the issue
-    # Pillow lib is installed there
-
-    from ..install_and_register.install_otio_local_dist import install_otio_local_dist
-    from ..install_and_register.install_dependencies import install_dependencies
-
-    if not install_otio_local_dist():
-
-        installErrorCode = install_dependencies([("opentimelineio", "opentimelineio")], retries=1, timeout=10)
-        # installErrorCode = 0
-        if 0 != installErrorCode:
-            # utils_handlers.removeAllHandlerOccurences(shotMngHandler_frame_change_pre_jumpToShot, handlerCateg=bpy.app.handlers.frame_change_pre)
-            # return installErrorCode
-            _logger.error_ext("  *** OpenTimelineIO install failed for Ubisoft Shot Manager ***")
-        else:
-            _logger.info_ext("  OpenTimelineIO correctly installed for Ubisoft Shot Manager")
-
-    # otio
-    try:
-        from .. import otio
-
-        otio.register()
-
-        # from shotmanager.otio import importOpenTimelineIOLib
-
-        # if importOpenTimelineIOLib():
-        #     otio.register()
-        # else:
-        #     print("       *** OTIO Package import failed ***")
-    except ModuleNotFoundError:
-        print("       *** OTIO Package import failed ****")
-
-    # PIL library - for Stamp Info and image writing
-    installErrorCode = install_dependencies([("PIL", "pillow")], retries=1, timeout=5)
-    if 0 != installErrorCode:
-        _logger.error_ext("  *** Pillow Imaging Library (PIL) install failed for Ubisoft Shot Manager ***")
-    else:
-        _logger.info_ext("  Pillow Imaging Library (PIL) correctly installed for Ubisoft Stamp Info")
-
-    try:
-        pil_logger = logging.getLogger("PIL")
-        pil_logger.setLevel(logging.INFO)
-    except Exception:
-        pass
-
 
 def register():
 
@@ -469,13 +419,6 @@ def unregister():
     except Exception as e:
         print(f"Trying to unregister sm-debug: {e}")
 
-    # if module_can_be_imported("shotmanager.otio"):
-    if module_can_be_imported("opentimelineio"):
-        from .. import otio
-
-        otio.unregister()
-    else:
-        print("       *** No Otio found to unregister ***")
 
     from ..overlay_tools.workspace_info import workspace_info
 

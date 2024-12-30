@@ -30,6 +30,7 @@ from .rendering import launchRender
 from shotmanager.utils import utils
 
 from shotmanager.config import config
+from shotmanager.utils.check_dependencies import check_dependencies
 
 
 # def get_media_path(out_path, take_name, shot_name):
@@ -134,6 +135,11 @@ class UAS_PT_ShotManager_Render(Operator):
 
     def execute(self, context):
         props = config.getAddonProps(context.scene)
+        if not props.dependency_checked:
+            if not check_dependencies():
+                self.report({"ERROR"}, "Missing dependencies. Could not install them")
+                return {"CANCELLED"}
+        props.dependency_checked = True
         prefs = config.getAddonPrefs()
         prefs.renderMode = self.renderMode
 

@@ -181,6 +181,8 @@ class UAS_ShotManager_Props(MontageInterface, PropertyGroup):
         options=set(),
     )
 
+    dependency_checked: BoolProperty(default=False)
+
     def initialize_shot_manager(self):
         _logger.info_ext(f"\nInitializing Ubisoft Shot Manager in the current scene ({bpy.context.scene.name})...")
         prefs = config.getAddonPrefs()
