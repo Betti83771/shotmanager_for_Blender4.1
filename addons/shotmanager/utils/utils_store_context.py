@@ -64,8 +64,9 @@ def storeUserRenderSettings(context, userRenderSettings, targetArea=None):
     # eevee
     ##############
     # if "BLENDER_EEVEE" == bpy.scene.render.engine:
-    userRenderSettings["eevee_taa_render_samples"] = scene.eevee.taa_render_samples
-    userRenderSettings["eevee_taa_samples"] = scene.eevee.taa_samples
+    if hasattr(scene, "eevee"):
+        userRenderSettings["eevee_taa_render_samples"] = scene.eevee.taa_render_samples
+        userRenderSettings["eevee_taa_samples"] = scene.eevee.taa_samples
 
     # workbench
     ##############
@@ -76,9 +77,9 @@ def storeUserRenderSettings(context, userRenderSettings, targetArea=None):
     # cycles
     ##############
     #  if "CYCLES" == bpy.scene.render.engine:
-    # if hasattr(scene, "cycles"):
-    userRenderSettings["cycles_samples"] = scene.cycles.samples
-    userRenderSettings["cycles_preview_samples"] = scene.cycles.preview_samples
+    if hasattr(scene, "cycles"):
+        userRenderSettings["cycles_samples"] = scene.cycles.samples
+        userRenderSettings["cycles_preview_samples"] = scene.cycles.preview_samples
 
     #######################
     # image stamping
@@ -155,8 +156,9 @@ def restoreUserRenderSettings(context, userRenderSettings, targetArea=None):
     # eevee
     ##############
     #   if "BLENDER_EEVEE" == bpy.scene.render.engine:
-    scene.eevee.taa_render_samples = userRenderSettings["eevee_taa_render_samples"]
-    scene.eevee.taa_samples = userRenderSettings["eevee_taa_samples"]
+    if hasattr(scene, "eevee"):
+        scene.eevee.taa_render_samples = userRenderSettings["eevee_taa_render_samples"]
+        scene.eevee.taa_samples = userRenderSettings["eevee_taa_samples"]
 
     # workbench
     ##############
@@ -167,9 +169,9 @@ def restoreUserRenderSettings(context, userRenderSettings, targetArea=None):
     # cycles
     ##############
     #        if "CYCLES" == bpy.scene.render.engine:
-    # if hasattr(scene, "cycles"):
-    scene.cycles.samples = userRenderSettings["cycles_samples"]
-    scene.cycles.preview_samples = userRenderSettings["cycles_preview_samples"]
+    if hasattr(scene, "cycles"):
+        scene.cycles.samples = userRenderSettings["cycles_samples"]
+        scene.cycles.preview_samples = userRenderSettings["cycles_preview_samples"]
 
     #######################
     # image stamping

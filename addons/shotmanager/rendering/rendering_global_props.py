@@ -136,8 +136,8 @@ class UAS_ShotManager_RenderGlobalContext(PropertyGroup):
 
         if "VERY_LOW" == renderQuality:
             # eevee
-            context.scene.eevee.taa_render_samples = 1
-            #    context.scene.eevee.taa_samples = 1
+            if hasattr(context.scene, "eevee"):
+                context.scene.eevee.taa_render_samples = 1
 
             # workbench
             # if "BLENDER_WORKBENCH" == bpy.context.scene.render.engine:
@@ -145,12 +145,13 @@ class UAS_ShotManager_RenderGlobalContext(PropertyGroup):
             #    context.scene.display.viewport_aa = "OFF"
 
             # cycles
-            context.scene.cycles.samples = 1
-        #    context.scene.cycles.preview_samples = 1
+            if hasattr(context.scene, "cycles"):
+                context.scene.cycles.samples = 1
 
         elif "LOW" == renderQuality:
             # eevee
-            context.scene.eevee.taa_render_samples = 6
+            if hasattr(context.scene, "eevee"):
+                context.scene.eevee.taa_render_samples = 6
             #    context.scene.eevee.taa_samples = 2
 
             # workbench
@@ -159,12 +160,14 @@ class UAS_ShotManager_RenderGlobalContext(PropertyGroup):
             #    context.scene.display.viewport_aa = "OFF"
 
             # cycles
-            context.scene.cycles.samples = 6
+            if hasattr(context.scene, "cycles"):
+                context.scene.cycles.samples = 6
         #    context.scene.cycles.preview_samples = 2
 
         elif "MEDIUM" == renderQuality:
             # eevee
-            context.scene.eevee.taa_render_samples = 32  # 64
+            if hasattr(context.scene, "eevee"):
+                context.scene.eevee.taa_render_samples = 32  # 64
             #    context.scene.eevee.taa_samples = 6  # 16
 
             # workbench
@@ -173,12 +176,14 @@ class UAS_ShotManager_RenderGlobalContext(PropertyGroup):
             #    context.scene.display.viewport_aa = "FXAA"
 
             # cycles
-            context.scene.cycles.samples = 64
+            if hasattr(context.scene, "cycles"):
+                context.scene.cycles.samples = 64
         #    context.scene.cycles.preview_samples = 16
 
         elif "HIGH" == renderQuality:
             # eevee
-            context.scene.eevee.taa_render_samples = 64  # 128
+            if hasattr(context.scene, "eevee"):
+                context.scene.eevee.taa_render_samples = 64  # 128
             #    context.scene.eevee.taa_samples = 12  # 32
 
             # workbench
@@ -187,7 +192,8 @@ class UAS_ShotManager_RenderGlobalContext(PropertyGroup):
             #    context.scene.display.viewport_aa = "5"
 
             # cycles
-            context.scene.cycles.samples = 128
+            if hasattr(context.scene, "cycles"):
+                context.scene.cycles.samples = 128
         #    context.scene.cycles.preview_samples = 32
 
         # CUSTOM
@@ -209,7 +215,8 @@ class UAS_ShotManager_RenderGlobalContext(PropertyGroup):
         if "VERY_LOW" == renderQuality:
             # eevee
             #    context.scene.eevee.taa_render_samples = 1
-            context.scene.eevee.taa_samples = 1
+            if hasattr(context.scene, "eevee"):
+                context.scene.eevee.taa_samples = 1
 
             # workbench
             # if "BLENDER_WORKBENCH" == bpy.context.scene.render.engine:
@@ -218,12 +225,14 @@ class UAS_ShotManager_RenderGlobalContext(PropertyGroup):
 
             # cycles
             #    context.scene.cycles.samples = 1
-            context.scene.cycles.preview_samples = 1
+            if hasattr(context.scene, "cycles"):
+                context.scene.cycles.preview_samples = 1
 
         elif "LOW" == renderQuality:
             # eevee
             #    context.scene.eevee.taa_render_samples = 6
-            context.scene.eevee.taa_samples = 2
+            if hasattr(context.scene, "eevee"):
+                context.scene.eevee.taa_samples = 2
 
             # workbench
             # if "BLENDER_WORKBENCH" == bpy.context.scene.render.engine:
@@ -232,12 +241,14 @@ class UAS_ShotManager_RenderGlobalContext(PropertyGroup):
 
             # cycles
             #    context.scene.cycles.samples = 6
-            context.scene.cycles.preview_samples = 2
+            if hasattr(context.scene, "cycles"):
+                context.scene.cycles.preview_samples = 2
 
         elif "MEDIUM" == renderQuality:
             # eevee
             #    context.scene.eevee.taa_render_samples = 32  # 64
-            context.scene.eevee.taa_samples = 6  # 16
+            if hasattr(context.scene, "eevee"):
+                context.scene.eevee.taa_samples = 6  # 16
 
             # workbench
             # if "BLENDER_WORKBENCH" == bpy.context.scene.render.engine:
@@ -246,12 +257,14 @@ class UAS_ShotManager_RenderGlobalContext(PropertyGroup):
 
             # cycles
             #    context.scene.cycles.samples = 64
-            context.scene.cycles.preview_samples = 16
+            if hasattr(context.scene, "cycles"):
+                context.scene.cycles.preview_samples = 16
 
         elif "HIGH" == renderQuality:
             # eevee
             #    context.scene.eevee.taa_render_samples = 64  # 128
-            context.scene.eevee.taa_samples = 12  # 32
+            if hasattr(context.scene, "eevee"):
+                context.scene.eevee.taa_samples = 12  # 32
 
             # workbench
             #            if "BLENDER_WORKBENCH" == bpy.context.scene.render.engine:
@@ -260,7 +273,8 @@ class UAS_ShotManager_RenderGlobalContext(PropertyGroup):
 
             # cycles
             #    context.scene.cycles.samples = 128
-            context.scene.cycles.preview_samples = 32
+            if hasattr(context.scene, "cycles"):
+                context.scene.cycles.preview_samples = 32
 
         # CUSTOM
         else:
