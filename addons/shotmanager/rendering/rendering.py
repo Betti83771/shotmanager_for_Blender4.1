@@ -1157,12 +1157,6 @@ def launchRender(context, renderMode, rootPath, area=None):
             if len(renderedFilesDict["sequence_video_file"]):
                 utils.openMedia(renderedFilesDict["sequence_video_file"], inExternalPlayer=True)
 
-        # open rendered media in vse
-        # wkip removed until uas_videotracks works
-        if False and preset.updatePlayblastInVSM:
-            from shotmanager.scripts.rrs.rrs_playblast import rrs_playblast_to_vsm
-
-            rrs_playblast_to_vsm(playblastInfo=renderedFilesDict["playblastInfos"])
 
     elif "ALL" == preset.renderMode:
         _logger.debug(f"Render All: {str(props.renderSettingsAll.renderAllTakes)}")
@@ -1216,12 +1210,6 @@ def launchRender(context, renderMode, rootPath, area=None):
                 if len(renderedFilesDict["sequence_video_file"]):
                     utils.openMedia(renderedFilesDict["sequence_video_file"], inExternalPlayer=True)
 
-        # open rendered media in vse
-        # wkip removed until uas_videotracks works
-        if False and preset.updatePlayblastInVSM:
-            from shotmanager.scripts.rrs.rrs_playblast import rrs_playblast_to_vsm
-
-            rrs_playblast_to_vsm(playblastInfo=renderedFilesDict["playblastInfos"])
 
     elif "OTIO" == renderMode:
         take = props.getCurrentTake()
@@ -1271,13 +1259,6 @@ def launchRender(context, renderMode, rootPath, area=None):
         if preset.openRenderedVideoInPlayer:
             if len(renderedFilesDict["sequence_video_file"]):
                 utils.openMedia(renderedFilesDict["sequence_video_file"], inExternalPlayer=True)
-
-        # open rendered media in vse
-        # wkip removed until uas_videotracks works
-        if False and preset.updatePlayblastInVSM:
-            from shotmanager.scripts.rrs.rrs_playblast import rrs_playblast_to_vsm
-
-            rrs_playblast_to_vsm(playblastInfo=renderedFilesDict["playblastInfos"])
 
     else:
         print("\n *** preset.renderMode is invalid, cannot render anything... ***\n")

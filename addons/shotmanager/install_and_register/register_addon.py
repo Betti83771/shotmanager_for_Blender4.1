@@ -61,7 +61,6 @@ from .. import rendering
 from ..rendering import rendering_ui
 
 from ..scripts import precut_tools
-from ..scripts import rrs
 from ..ui import sm_ui
 
 from ..utils import utils
@@ -175,7 +174,6 @@ def register():
     greasepencil_25D_ui.register()
     retimer_ui.register()
     rendering_ui.register()
-    rrs.register()
 
     utils_vse_render.register()
     # try:
@@ -192,9 +190,6 @@ def register():
     keymaps.register()
     handlers.register()
     stampinfo.register()
-
-    # rrs specific
-    # rrs_vsm_tools.register()
 
     # declaration of properties that will not be saved in the scene:
     ####################

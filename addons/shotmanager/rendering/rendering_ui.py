@@ -509,14 +509,12 @@ def draw3DRenderPanel(self, context):
     row = layout.row(align=True)
     row.scale_y = 1.3
     row.scale_x = 1.2
-    row.prop(props, "displayOtioProps", text="", icon="SEQ_STRIP_DUPLICATE")
-    row.operator("uas_shot_manager.render", text="Edit File").renderMode = "OTIO"
+    row.prop(props, "displayPlayblastProps", text="", icon="FILE_MOVIE")  # AUTO
+    row.operator("uas_shot_manager.render", text="Playblast").renderMode = "PLAYBLAST"
 
     # row = layout.row()
     # row = layout.row(align=True)
     row.separator(factor=2)
-    row.prop(props, "displayPlayblastProps", text="", icon="FILE_MOVIE")  # AUTO
-    row.operator("uas_shot_manager.render", text="Playblast").renderMode = "PLAYBLAST"
 
     # scene warnings
     ################
@@ -743,36 +741,6 @@ def draw3DRenderPanel(self, context):
         drawAfterRendering(props.renderSettingsAll, box, openButEnabled=openButEnabled)
 
         drawRenderInfos(context, box)
-
-    # EDIT FILE ###
-    elif props.displayOtioProps:
-        titleRow = layout.row(align=True)
-        titleRow.separator(factor=0.5)
-        titleRow.label(text="Generate Edit File:")
-
-        box = layout.box()
-
-        row = box.row()
-        row.label(text="Generate for:")
-        if config.devDebug:
-            row.prop(props.renderSettingsOtio, "outputMediaMode", text="")
-        else:
-            row.label(text="Videos (Only Supported Format)")
-
-        row = box.row()
-        row.label(text="File Type:")
-        row.prop(props.renderSettingsOtio, "otioFileType", text="")
-
-        row = box.row()
-
-        take = props.getCurrentTake()
-        filePath = (
-            props.getOutputMediaPath("TK_EDIT_VIDEO", take, rootPath=props.renderRootPath, provideExtension=False)
-            + f".{props.renderSettingsOtio.otioFileType.lower()}"
-        )
-
-        row.label(text="Current Take Edit: " + filePath)
-        row.operator("uas_shot_manager.open_explorer", text="", icon_value=iconExplorer.icon_id).path = filePath
 
     # PLAYBLAST ###
     elif props.displayPlayblastProps:
