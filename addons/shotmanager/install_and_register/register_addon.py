@@ -362,7 +362,6 @@ def unregister():
     # except Exception:
     #     print("*** Paf for utils_vse_render.unregister")
 
-    rrs.unregister()
     rendering_ui.unregister()
     retimer_ui.unregister()
     greasepencil_25D_ui.unregister()
